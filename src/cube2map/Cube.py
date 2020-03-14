@@ -198,9 +198,9 @@ class Cube(object):
 
     def edgespan2vectorcube(self):
         if self.isentirelysolid() or self.isempty(): return
-        for x in xrange(2):
-            for y in xrange(2):
-                for z in xrange(2):
+        for x in range(2):
+            for y in range(2):
+                for z in range(2):
                     p = ivec(8 * x, 8 * y, 8 * z)
                     v = vec(0, 0, 0)
 
@@ -213,7 +213,7 @@ class Cube(object):
                     self.setcubeedge(2, x, y, edgeval(self.getcubeedge(2, x, y), z, int(v.z + 0.49)))
 
 def newcubes(face=F_EMPTY, mat=empty_material_types.MAT_AIR):
-    return map(lambda _: Cube(face, mat), xrange(8))
+    return [Cube(face, mat) for _ in range(8)]
 
 def genfaceverts(c, orient, v):
     if orient == 0:

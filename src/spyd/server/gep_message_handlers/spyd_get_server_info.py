@@ -12,7 +12,7 @@ class SpydGetServerInfoMessageHandler(object):
         room_manager = spyd_server.room_manager
 
         server_info = {
-            "rooms": room_manager.rooms.keys()
+            "rooms": list(room_manager.rooms.keys())
         }
 
         gep_client.send({'msgtype': 'server_info', 'server_info': server_info}, message.get('reqid'))

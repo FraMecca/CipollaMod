@@ -80,14 +80,14 @@ class Client(object):
         return smf.format(fmt, player=player)
 
     def connected(self):
-        print "connect:", self.host
+        print("connect:", self.host)
         with self.sendbuffer(1, True) as cds:
             swh.put_servinfo(cds, self, haspwd=False, description="", domain=self._servinfo_domain)
 
         self.connect_timeout_deferred = reactor.callLater(1, self.connect_timeout)
 
     def disconnected(self):
-        print "disconnect:", self.host
+        print("disconnect:", self.host)
         if self.is_connected:
             self.room.client_leave(self)
             self.event_subscription_fulfiller.publish('spyd.game.player.disconnect', {'player': self.uuid, 'room': self.room.name})
@@ -109,6 +109,7 @@ class Client(object):
         player = Player(self, self.cn, name, playermodel)
         self.add_player(player)
 
+        print(message)
         pwdhash = message['pwdhash']
         authdomain = message['authdomain']
         authname = message['authname']
@@ -206,7 +207,7 @@ class Client(object):
         elif isinstance(e, GenericError):
             self.send_server_message(error(e.message))
         elif isinstance(e, ConstraintViolation):
-            print "Disconnecting client {} due to constraint violation {}.".format(self.host, e.constraint_name)
+            print("Disconnecting client {} due to constraint violation {}.".format(self.host, e.constraint_name))
             self.disconnect(disconnect_types.DISC_MSGERR)
 
     def _message_received(self, message_type, message):
@@ -215,7 +216,7 @@ class Client(object):
             if (not self.is_connected) and (message_type in self._ignored_preconnect_message_types):
                 pass
             elif (not self.is_connected) and (message_type not in self._allowed_preconnect_message_types):
-                print message_type
+                print(message_type)
                 self.disconnect(disconnect_types.DISC_MSGERR)
                 return
             else:
@@ -226,7 +227,7 @@ class Client(object):
                     except (InsufficientPermissions, StateError, UsageError, GenericError, ConstraintViolation) as e:
                         self.handle_exception(e)
                 else:
-                    print "Client received unhandled message type:", message_type, message
+                    print("Client received unhandled message type:", message_type, message)
         except ConstraintViolation as e:
             pass  # Plenty of information already printed.
         except:

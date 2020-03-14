@@ -119,7 +119,7 @@ class Traitors(ModeBase, FightingBase, SpawningBase, SpectatingBase):
                 self.room._broadcaster.server_message(info('The traitor, {name#traitor}, has left the game.', traitor=player))
                 self._ended()
             else:
-                alive_non_traitorous_players = filter(lambda p: p.state.is_alive and p is not self._tist_traitor, self.room.players)
+                alive_non_traitorous_players = [p for p in self.room.players if p.state.is_alive and p is not self._tist_traitor]
 
                 if len(alive_non_traitorous_players) == 0:
                     self.room._broadcaster.server_message(info('The the last living innocent player, {name#player}, has left the game. The traitor, {name#traitor}, is victorious.', traitor=self._tist_traitor, player=player))
@@ -128,7 +128,7 @@ class Traitors(ModeBase, FightingBase, SpawningBase, SpectatingBase):
         if self._tist_state == tist_states.PLAYING:
             player.client.send_server_message(info('You have been betrayed, choose your friends more wisely.'))
 
-            alive_non_traitorous_players = filter(lambda p: p.state.is_alive and p is not self._tist_traitor, self.room.players)
+            alive_non_traitorous_players = [p for p in self.room.players if p.state.is_alive and p is not self._tist_traitor]
 
             if player is self._tist_traitor:
                 if player is killer:
@@ -193,10 +193,10 @@ class Traitors(ModeBase, FightingBase, SpawningBase, SpectatingBase):
 
     def on_player_explode(self, player, cmillis, gun, explode_id, hits):
         if gun == weapon_types.GUN_RL:
-            if not explode_id in player.state.rockets.keys(): return
+            if not explode_id in list(player.state.rockets.keys()): return
             del player.state.rockets[explode_id]
         elif gun == weapon_types.GUN_GL:
-            if not explode_id in player.state.grenades.keys(): return
+            if not explode_id in list(player.state.grenades.keys()): return
             del player.state.grenades[explode_id]
 
         self._broadcaster.explodefx(player, gun, explode_id)

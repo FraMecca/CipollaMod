@@ -8,7 +8,7 @@ import_all(__file__, 'spyd.game.gamemode', ['__init__'])
 mode_nums = {}
 gamemodes = {}
 
-gamemode_objects = map(lambda a: a.registered_object, RegistryManager.get_registrations('gamemode'))
+gamemode_objects = [a.registered_object for a in RegistryManager.get_registrations('gamemode')]
 
 for gamemode_object in gamemode_objects:
     if gamemode_object.isbasemode:

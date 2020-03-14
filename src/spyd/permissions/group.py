@@ -20,10 +20,10 @@ class Group(object):
         if self._search_is_allowed(functionality_name):
             return True
 
-        inherited_allows = map(lambda g: g.allowed(functionality_name), self._inherits)
+        inherited_allows = [g.allowed(functionality_name) for g in self._inherits]
         
         # Filter out None from the inherited _allows because they shouldn't count as _denies
-        inherited_allows = filter(lambda a: a is not None, inherited_allows)
+        inherited_allows = [a for a in inherited_allows if a is not None]
 
         if len(inherited_allows) == 0:
             return None

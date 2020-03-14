@@ -1,6 +1,6 @@
 from twisted.application import service
 from twisted.application.internet import TCPClient
-from zope.interface import implements
+from zope.interface import implementer
 
 from spyd.authentication.interfaces import IAuthService
 from spyd.authentication.services.maestro.protocol_factory import MaestroProtocolFactory
@@ -10,7 +10,7 @@ from spyd.registry_manager import register
 
 @register("master_client_service", "maestro")
 class MaestroMasterClientService(service.MultiService):
-    implements(IAuthService)
+    implementer(IAuthService)
 
     @staticmethod
     def build(punitive_model, config):

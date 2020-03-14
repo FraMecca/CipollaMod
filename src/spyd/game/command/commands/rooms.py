@@ -15,6 +15,6 @@ class RoomsCommand(CommandBase):
 
     @classmethod
     def execute(cls, spyd_server, room, client, command_string, arguments, raw_args):
-        for room in room.manager.rooms.itervalues():
+        for room in room.manager.rooms.values():
             if room.empty: continue
             client.send_server_message(info(room_info_msg, room=room))

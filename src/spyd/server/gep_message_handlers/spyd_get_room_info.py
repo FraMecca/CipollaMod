@@ -24,7 +24,7 @@ class SpydGetPlayerInfoMessageHandler(object):
             'resume_delay': room.resume_delay,
             'mode': room.mode_name,
             'map': room.map_name,
-            'players': map(lambda player: player.uuid, room.players),
+            'players': [player.uuid for player in room.players],
             'show_awards': room.show_awards,
             'mastermode': room.mastermode,
             'mastermask': room.mastermask,

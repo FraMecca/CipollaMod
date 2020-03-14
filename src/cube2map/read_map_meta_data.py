@@ -47,7 +47,7 @@ def read_map_data(map_filename):
         if version <= 29:
             numvslots = 0
     
-        for i in xrange(numvars):
+        for i in range(numvars):
             var_type = struct.unpack("b", f.read(1))[0]
             ilen     = struct.unpack("<H", f.read(2))[0]
             var_name = f.read(ilen)

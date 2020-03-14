@@ -46,10 +46,10 @@ class FightingBase(object):
                 
     def on_player_explode(self, player, cmillis, gun, explode_id, hits):
         if gun == weapon_types.GUN_RL:
-            if not explode_id in player.state.rockets.keys(): return
+            if not explode_id in list(player.state.rockets.keys()): return
             del player.state.rockets[explode_id]
         elif gun == weapon_types.GUN_GL:
-            if not explode_id in player.state.grenades.keys(): return
+            if not explode_id in list(player.state.grenades.keys()): return
             del player.state.grenades[explode_id]
 
         self._broadcaster.explodefx(player, gun, explode_id)

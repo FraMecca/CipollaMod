@@ -15,7 +15,7 @@ def filtertext(src, whitespace, maxlen):
 
         return True
 
-    dst = filter(allowchar, src)
+    dst = list(filter(allowchar, src))
 
     if len(dst) > maxlen:
         dst = dst[:maxlen]

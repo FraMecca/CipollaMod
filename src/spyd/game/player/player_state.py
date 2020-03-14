@@ -122,7 +122,7 @@ class PlayerState(object):
             if self.playing_timer is not None:
                 self.playing_timer.resume()
         else:
-            print "failed to set is_spectator"
+            print("failed to set is_spectator")
 
     def respawn(self):
         self._pending_spawn = True
@@ -214,7 +214,7 @@ class PlayerState(object):
 
     def pickup_item(self, item_type):
         if item_type < item_types.I_SHELLS or item_type > item_types.I_QUAD:
-            print "Item out of range could not be picked up."
+            print("Item out of range could not be picked up.")
             return
 
         itemstat = itemstats[item_type - item_types.I_SHELLS]

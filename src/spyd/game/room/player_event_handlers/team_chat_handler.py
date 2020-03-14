@@ -11,9 +11,9 @@ class TeamChatHandler(object):
         if player.isai: return
 
         if player.state.is_spectator:
-            clients = filter(lambda c: c.get_player().state.is_spectator, room.clients)
+            clients = [c for c in room.clients if c.get_player().state.is_spectator]
         else:
-            clients = filter(lambda c: c.get_player().team == player.team, room.clients)
+            clients = [c for c in room.clients if c.get_player().team == player.team]
 
         with room.broadcastbuffer(1, True, [player.client], clients) as cds:
             swh.put_sayteam(cds, player.client, text)

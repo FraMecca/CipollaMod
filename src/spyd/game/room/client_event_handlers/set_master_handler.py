@@ -12,4 +12,4 @@ class SetMasterHandler(object):
         if target is None:
             raise UnknownPlayer(cn=target_cn)
 
-        room._client_try_set_privilege(client, target, requested_privilege)
+        room._client_try_set_privilege(client, target, requested_privilege, password_hash)

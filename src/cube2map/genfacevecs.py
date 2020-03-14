@@ -258,7 +258,7 @@ def genfacevecs(cu, orient, pos, size, solid, fvecs, v = None):
                     f.x = ((pos.y)<<3)
                     i += 1
         return 4
-    buf = [ivec() for _ in xrange(4)]
+    buf = [ivec() for _ in range(4)]
     
     if v is None:
         genfaceverts(cu, orient, buf)

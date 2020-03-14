@@ -34,7 +34,7 @@ class ClientProtocol(ENetClientProtocol):
             with self._message_processing_execution_timer.measure():
                 processed_messages = self._message_processor.process(channel, data)
         except:
-            print "Error processing messages from {}:{}".format(self._client.host, self._client.port)
+            print("Error processing messages from {}:{}".format(self._client.host, self._client.port))
             traceback.print_exc()
             self.disconnect(disconnect_types.DISC_MSGERR)
             return

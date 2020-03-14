@@ -14,17 +14,17 @@ class PlayerCollection(object):
         return len(self._players)
     
     def to_list(self):
-        return self._players.values()
+        return list(self._players.values())
     
     def to_iterator(self):
-        return self._players.itervalues()
+        return iter(self._players.values())
     
     def by_pn(self, pn):
         return self._players[pn]
     
     def is_name_duplicate(self, name):
         name_count = 0
-        for player in self._players.itervalues():
+        for player in self._players.values():
             if player.name == name:
                 name_count += 1
                 if name_count > 1:

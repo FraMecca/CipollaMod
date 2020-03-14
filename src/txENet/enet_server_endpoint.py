@@ -1,13 +1,13 @@
 import enet
 from twisted.internet.interfaces import IStreamServerEndpoint
-from zope.interface import implements
+from zope.interface import implementer
 
 from txENet.enet_host import ENetHost
 from twisted.python import log
 
 
 class ENetServerEndpoint(object):
-    implements(IStreamServerEndpoint)
+    implementer(IStreamServerEndpoint)
 
     def __init__(self, reactor, interface, port, maxclients, channels, maxdown=0, maxup=0, max_duplicate_peers=None):
         self._reactor = reactor

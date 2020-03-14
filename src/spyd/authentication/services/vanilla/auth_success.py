@@ -1,11 +1,11 @@
-from zope.interface import implements
+from zope.interface import implementer
 
 from spyd.authentication.interfaces import IGroupProvider, IAuthSuccess
 from spyd.authentication.domain_to_auth_group import domain_to_auth_group
 
 
 class VanillaAuthSuccess(object):
-    implements(IAuthSuccess)
+    implementer(IAuthSuccess)
     
     def __init__(self, auth_domain, auth_name):
         self.group_provider = VanillaGroupProvider(auth_domain, auth_name)
@@ -15,7 +15,7 @@ class VanillaAuthSuccess(object):
         self.client_message_kwargs = {}
 
 class VanillaGroupProvider(object):
-    implements(IGroupProvider)
+    implementer(IGroupProvider)
 
     def __init__(self, domain, auth_name):
         self.domain = domain

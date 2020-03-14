@@ -8,14 +8,14 @@ def insideface(p, nump, o, numo):
     
     prev = o[numo-1]
     
-    for i in xrange(numo):
+    for i in range(numo):
     
         cur = o[i]
         d = facevec(cur.x-prev.x, cur.y-prev.y)
         
         offset = d.x*prev.y - d.y*prev.x
         
-        for j in xrange(nump):
+        for j in range(nump):
             if d.x*p[j].y - d.y*p[j].x > offset:
                 return False;
            

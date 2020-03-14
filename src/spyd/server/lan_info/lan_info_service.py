@@ -17,7 +17,7 @@ class LanInfoService(service.Service):
         self._listeners = []
 
     def startService(self):
-        for room, (interface, port) in self.rooms_ports.iteritems():
+        for room, (interface, port) in self.rooms_ports.items():
             lan_info_protocol = LanInfoProtocol(multicast=False, ext_info_enabled=self.ext_info_config['enabled'])
 
             lan_info_responder = LanInfoResponder(self.room_manager, lan_info_protocol, room, self.ext_info_config)

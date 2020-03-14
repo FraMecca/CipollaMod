@@ -19,8 +19,8 @@ class TestMatchFuzzy(unittest.TestCase):
 
     def test_timing(self):
         start = time.clock()
-        match_fuzzy('zzz', [chr(c) * 4 for c in xrange(ord('a'), ord('z'))] * 400)
+        match_fuzzy('zzz', [chr(c) * 4 for c in range(ord('a'), ord('z'))] * 400)
         end = time.clock()
         execution_time = end - start
         times_per_second = 1.0 / execution_time
-        print times_per_second
+        print(times_per_second)

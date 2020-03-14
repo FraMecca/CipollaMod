@@ -17,7 +17,7 @@ class PunitiveModel(object):
     def get_effect(self, effect_type, client_ip):
         client_ip = dottedQuadToLong(client_ip)
         effects_of_type = self.punitive_effects.get(effect_type, {})
-        for mask, effects in effects_of_type.iteritems():
+        for mask, effects in effects_of_type.items():
             masked_ip = mask & client_ip
             if masked_ip in effects:
                 return effects[masked_ip]
@@ -26,7 +26,7 @@ class PunitiveModel(object):
     def add_effect(self, effect_type, effect_desc, effect_info):
         if type(effect_desc) is tuple:
             if type(effect_desc[0]) == str:
-                effect_desc = map(dottedQuadToLong, effect_desc)
+                effect_desc = list(map(dottedQuadToLong, effect_desc))
             long_ip, long_mask = effect_desc
         else:
             long_ip, long_mask = simpleMaskedIpToLongIpAndMask(effect_desc)

@@ -8,8 +8,8 @@ from spyd.utils.match_fuzzy import match_fuzzy
 def resolve_map_name(room, map_name):
     valid_map_names = yield room.get_map_names()
 
-    if not isinstance(map_name, unicode):
-        map_name = unicode(map_name, 'utf_8')
+    if not isinstance(map_name, str):
+        map_name = str(map_name, 'utf_8')
 
     map_name_match = match_fuzzy(map_name, valid_map_names)
 

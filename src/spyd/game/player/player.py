@@ -13,7 +13,7 @@ class Player(object):
     def __init__(self, client, playernum, name, playermodel):
         self.client = client
         self._pn = playernum
-        self.name = name
+        self.name = ''.join(name)
         self.playermodel = playermodel
         self._team = NullTeam()
         self._isai = False

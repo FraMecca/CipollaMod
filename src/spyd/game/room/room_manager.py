@@ -18,7 +18,7 @@ class RoomManager(object):
         if name in self.rooms:
             return self.rooms[name]
         elif fuzzy:
-            name_match = match_fuzzy(name, self.rooms.keys())
+            name_match = match_fuzzy(name, list(self.rooms.keys()))
             return self.rooms.get(name_match, None)
 
     def on_room_player_count_changed(self, room):
@@ -26,7 +26,7 @@ class RoomManager(object):
             del self.rooms[room.name]
 
     def find_room_for_client_ip(self, client_ip):
-        for room in self.rooms.values():
+        for room in list(self.rooms.values()):
             if room.contains_client_with_ip(client_ip):
                 return room
 

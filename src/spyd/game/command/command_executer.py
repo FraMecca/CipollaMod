@@ -45,5 +45,5 @@ class CommandExecuter(object):
 
     def get_available_commands(self, client):
         command_list = self._command_finder.get_command_list()
-        command_list = filter(lambda c: client.allowed(c.functionality), command_list)
+        command_list = [c for c in command_list if client.allowed(c.functionality)]
         return command_list

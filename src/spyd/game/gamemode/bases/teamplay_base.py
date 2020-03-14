@@ -17,12 +17,12 @@ class TeamplayBase(object):
 
     def initialize_player(self, cds, player):
         if player.state.state == client_states.CS_SPECTATOR: return
-        possible_teams = filter(lambda t: t.size > 0 or t.name in base_teams, self.teams.values())
+        possible_teams = [t for t in list(self.teams.values()) if t.size > 0 or t.name in base_teams]
         smallest_team = min(possible_teams, key=lambda t: t.size)
         player.team = smallest_team
         player.team.size += 1
         swh.put_setteam(cds, player, -1)
-        swh.put_teaminfo(cds, self.teams.itervalues())
+        swh.put_teaminfo(cds, iter(self.teams.values()))
 
     def on_player_disconnected(self, player):
         if player.team is not None:

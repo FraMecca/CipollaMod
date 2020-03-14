@@ -1,16 +1,16 @@
 from twisted.internet import defer
-from zope.interface import implements
+from zope.interface import implementer
 
 from spyd.authentication.exceptions import AuthFailedException
 from spyd.authentication.interfaces import IAuthService
 
 
+implementer(IAuthService)
 class AuthWorldView(object):
     '''Represents the collection of authentication services available to a given client.
     Implements the interface of an Auth Service, but distributes requests and answers based on the
     auth_domain.
     '''
-    implements(IAuthService)
 
     def __init__(self, auth_services):
         self._auth_services = auth_services

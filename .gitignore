@@ -41,3 +41,5 @@ nosetests.xml
 
 # setup.py
 MANIFEST
+src/pyenet-0.1.0
+src/spyd/data/config.json

@@ -1,15 +1,13 @@
 import os.path
 import re
-
-import simplejson
-
+import json
 
 class ConfigurationError(Exception): pass
 
 def load_json_to_dictionary(json_filename):
     with open(json_filename, 'rb') as f:
         try:
-            return simplejson.load(f)
+            return json.load(f)
         except ValueError as e:
             message = "{}: {}".format(json_filename, e.message)
             raise ConfigurationError(message)
@@ -19,7 +17,7 @@ json_file_uri_pattern = re.compile('^file:\/\/(.*\.json)$')
 def resolve_referenced_configs(config_object):
     if isinstance(config_object, dict):
         config_dictionary = config_object
-        for k, v in config_dictionary.items():
+        for k, v in list(config_dictionary.items()):
             if isinstance(v, (dict, list)):
                 resolve_referenced_configs(v)
             else:
@@ -33,7 +31,7 @@ def resolve_referenced_configs(config_object):
                     pass
     elif isinstance(config_object, list):
         config_list = config_object
-        for i in xrange(len(config_list)):
+        for i in range(len(config_list)):
             v = config_list[i]
             if isinstance(v, (dict, list)):
                 resolve_referenced_configs(v)

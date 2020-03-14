@@ -31,7 +31,7 @@ class ClientNumberHandleProvider(object):
 def get_client_number_handle_provider(config):
     room_bindings = config.get('room_bindings', {})
     max_client_sum = 0
-    for room_binding in room_bindings.itervalues():
+    for room_binding in room_bindings.values():
         max_client_sum += room_binding.get('maxclients', 0)
 
     client_number_provider = ClientNumberProvider(max_client_sum)

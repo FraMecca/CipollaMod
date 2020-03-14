@@ -16,7 +16,7 @@ def newcubeext(cube, maxverts=0, init=True):
             ext.surfaces = cube.ext.surfaces
             ext.verts = cube.ext.verts
         else:
-            ext.surfaces = map(lambda _: SurfaceInfo(), xrange(6))
+            ext.surfaces = [SurfaceInfo() for _ in range(6)]
     
     cube.ext = ext
     

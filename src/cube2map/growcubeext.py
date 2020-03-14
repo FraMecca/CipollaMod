@@ -7,7 +7,7 @@ from cube2map.VertInfo import VertInfo
 
 def growcubeext(old, maxverts):
     ext = CubeExt()
-    ext.verts = map(lambda _: VertInfo(), xrange(maxverts))
+    ext.verts = [VertInfo() for _ in range(maxverts)]
     if old is not None:
         ext.va = old.va
         ext.ents = old.ents

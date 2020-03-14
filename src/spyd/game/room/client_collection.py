@@ -20,16 +20,16 @@ class ClientCollection(object):
         return len(self._clients)
 
     def to_list(self):
-        return self._clients.values()
+        return list(self._clients.values())
 
     def to_iterator(self):
-        return self._clients.itervalues()
+        return iter(self._clients.values())
 
     def by_cn(self, cn):
         return self._clients[cn]
 
     def broadcast(self, channel, data, reliable=False, exclude=None, clients=None):
-        clients = clients or self._clients.itervalues()
+        clients = clients or iter(self._clients.values())
         exclude = set(exclude or ())
         for v in tuple(exclude):
             if isinstance(v, Player):

@@ -1,12 +1,12 @@
 from twisted.internet import defer
-from zope.interface import implements
+from zope.interface import implementer
 
 from spyd.authentication.interfaces import IAuthChallenge
 from spyd.authentication.services.vanilla.constants import authentication_states
 
 
 class AuthChallenge(object):
-    implements(IAuthChallenge)
+    implementer(IAuthChallenge)
 
     def __init__(self, auth_id, auth_domain, challenge):
         self.auth_id = auth_id

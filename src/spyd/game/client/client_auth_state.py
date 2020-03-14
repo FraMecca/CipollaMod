@@ -44,7 +44,7 @@ class ClientAuthState(object):
             swh.put_authchall(cds, auth_domain, auth_id, challenge)
 
     def on_auth_failure(self, deferred_exception):
-        self.client.send_server_message(error(deferred_exception.value.message))
+        self.client.send_server_message(error(str(deferred_exception.value)))
         self.auth_deferred.errback(deferred_exception)
         self.auth_deferred = None
 

@@ -155,7 +155,7 @@ class DuelCommand(CommandBase):
             cn, mode_name, map_name = parse_arguments(raw_args)
 
             if mode_name is not None:
-                valid_mode_names = gamemodes.keys()
+                valid_mode_names = list(gamemodes.keys())
                 mode_name_match = match_fuzzy(str(mode_name), valid_mode_names)
 
                 if mode_name_match is None:

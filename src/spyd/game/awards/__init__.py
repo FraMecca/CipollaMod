@@ -11,7 +11,7 @@ def format_name(client):
     return smf.format("{name#client}", client=client)
 
 def format_names(clients):
-    names = map(format_name, clients)
+    names = list(map(format_name, clients))
 
     if len(names) == 1:
         return names[0]
@@ -32,12 +32,12 @@ class AwardInstance(object):
         self.award = award
         self.clients_iter = clients_iter
 
-        self.eligible_clients = filter(lambda c: award.is_client_eligible(c), clients_iter())
+        self.eligible_clients = [c for c in clients_iter() if award.is_client_eligible(c)]
 
         self.left_weight = award.left_weight
 
     def get_winners(self, winning_stat_value):
-        winners = filter(lambda c: self.award.get_stat_from_client(c) == winning_stat_value, self.clients_iter())
+        winners = [c for c in self.clients_iter() if self.award.get_stat_from_client(c) == winning_stat_value]
         return winners
 
     def get_winning_stat_value(self):
@@ -57,20 +57,20 @@ class AwardInstance(object):
 awards_wrapper = wrapper_function('info', 'Awards')
 
 def display_awards(room):
-    awards = map(lambda a: a.registered_object, RegistryManager.get_registrations('award'))
+    awards = [a.registered_object for a in RegistryManager.get_registrations('award')]
 
     mode_name = room.gamemode.clientmodename
 
-    awards = filter(lambda a: a.is_valid_mode(mode_name), awards)
+    awards = [a for a in awards if a.is_valid_mode(mode_name)]
 
-    awards = map(lambda a: AwardInstance(a, room._players.to_iterator), awards)
+    awards = [AwardInstance(a, room._players.to_iterator) for a in awards]
 
-    awards = filter(lambda a: a.has_winner, awards)
+    awards = [a for a in awards if a.has_winner]
 
     if awards:
         awards = sorted(awards, key=lambda a: a.left_weight, reverse=True)
 
-        awards = map(lambda a: a.get_formatted(), awards)
+        awards = [a.get_formatted() for a in awards]
 
         award_string = " | ".join(awards)
         room.server_message(awards_wrapper("{awards}", awards=award_string))

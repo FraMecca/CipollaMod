@@ -19,7 +19,7 @@ def occludesface(c, orient, o, size, vo, vsize, vmat, nmat, matmask, vf, numv):
     
     if c.children == 0:
         if nmat != empty_material_types.MAT_AIR and (c.material & matmask) == nmat:
-            nf = [facevec() for _ in xrange(8)]
+            nf = [facevec() for _ in range(8)]
             return clipfacevecs(vf, numv, o[C[dim]], o[R[dim]], size, nf) < 3;
         
         if c.isentirelysolid():
@@ -31,7 +31,7 @@ def occludesface(c, orient, o, size, vo, vsize, vmat, nmat, matmask, vf, numv):
         if touchingface(c, orient) and faceedges(c, orient) == F_SOLID:
             return True
         
-        cf = [facevec() for _ in xrange(8)]
+        cf = [facevec() for _ in range(8)]
         numc = clipfacevecs(vf, numv, o[C[dim]], o[R[dim]], size, cf)
         
         if numc < 3:
@@ -40,7 +40,7 @@ def occludesface(c, orient, o, size, vo, vsize, vmat, nmat, matmask, vf, numv):
         if c.isempty() or notouchingface(c, orient):
             return False
         
-        of = [facevec() for _ in xrange(4)]
+        of = [facevec() for _ in range(4)]
         
         numo = genfacevecs(c, orient, o, size, False, of)
         
@@ -49,7 +49,7 @@ def occludesface(c, orient, o, size, vo, vsize, vmat, nmat, matmask, vf, numv):
     size >>= 1
     coord = dimcoord(orient)
     
-    for i in xrange(8):
+    for i in range(8):
         if octacoord(dim, i) == coord:
             if occludesface(c.children[i], orient, ivec(i, o.x, o.y, o.z, size), size, vo, vsize, vmat, nmat, matmask, vf, numv) == 0:
                 return False;

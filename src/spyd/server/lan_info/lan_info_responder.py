@@ -44,7 +44,7 @@ class LanInfoResponder(object):
             self.room.is_paused,
             100)
 
-        self.respond(str(cds), address)
+        self.respond(bytes(cds), address)
 
     def ext_info_request(self, address, rcds):
         cmd = rcds.getint()
@@ -68,7 +68,7 @@ class LanInfoResponder(object):
 
         cds.putint(1337)
 
-        self.respond(str(cds), address)
+        self.respond(bytes(cds), address)
 
     def ext_player_stats_request(self, address, rcds, pn):
         player = self.get_player(pn) if pn > 0 else None
@@ -92,7 +92,7 @@ class LanInfoResponder(object):
         for player in players:
             cds.putint(player.pn)
 
-        self.respond(str(cds), address)
+        self.respond(bytes(cds), address)
 
     def ext_send_player_stats(self, address, rcds, player):
         cds = get_ext_info_reply_cds(rcds)
@@ -125,7 +125,7 @@ class LanInfoResponder(object):
             for i in range(3):
                 cds.putbyte(0)
 
-        self.respond(str(cds), address)
+        self.respond(bytes(cds), address)
 
     def ext_team_stats_request(self, address, rcds):
         cds = get_ext_info_reply_cds(rcds)
@@ -139,14 +139,14 @@ class LanInfoResponder(object):
         # if self.room.is_teammode:
         #    pass
 
-        self.respond(str(cds), address)
+        self.respond(bytes(cds), address)
 
     def ext_error(self, address, rcds):
         cds = get_ext_info_reply_cds(rcds)
 
         cds.putint(EXT_ERROR)
 
-        self.respond(str(cds), address)
+        self.respond(bytes(cds), address)
 
     def respond(self, data, address):
         self.lan_info_protocol.send(data, address)

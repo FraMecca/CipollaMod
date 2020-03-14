@@ -18,8 +18,8 @@ class PauseGameHandler(object):
         if pause:
             if room.is_paused and not room.is_resuming: raise StateError('The game is already paused.')
             room.pause()
-            room._broadcaster.server_message(info("{name#client} has paused the game.", client=client))
+            room._broadcaster.server_message(info(f"{client.get_player().name} has paused the game."))
         elif not pause:
             if not room.is_paused: raise StateError('The game is already resumed.')
             room.resume()
-            room._broadcaster.server_message(info("{name#client} has resumed the game.", client=client))
+            room._broadcaster.server_message(info(f"{client.get_player().name} has resumed the game."))

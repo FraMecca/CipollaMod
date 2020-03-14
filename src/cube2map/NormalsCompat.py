@@ -10,5 +10,5 @@ class NormalsCompat(object):
     @staticmethod
     def read(f):
         nc = NormalsCompat()
-        nc.normals = map(lambda _: readbvec(f), xrange(4))
+        nc.normals = [readbvec(f) for _ in range(4)]
         return nc

@@ -1,11 +1,11 @@
-from zope.interface import implements
+from zope.interface import implementer
 
 from spyd.authentication.interfaces import IGroupProvider, IAuthSuccess
 from spyd.authentication.domain_to_auth_group import domain_to_auth_group
 
 
 class MaestroAuthSuccess(object):
-    implements(IAuthSuccess)
+    implementer(IAuthSuccess)
     
     def __init__(self, auth_domain, auth_name, uid, groups):
         self.group_provider = MaestroGroupProvider(auth_domain, auth_name, groups)
@@ -15,7 +15,7 @@ class MaestroAuthSuccess(object):
         self.client_message_kwargs = {}
 
 class MaestroGroupProvider(object):
-    implements(IGroupProvider)
+    implementer(IGroupProvider)
 
     def __init__(self, domain, auth_name, groups):
         self.domain = domain

@@ -1,6 +1,6 @@
 import glob
-import json
-import os.path
+import pickle
+import os
 import sys
 
 from cube2map.read_map_meta_data import read_map_data
@@ -16,10 +16,12 @@ if sys.argv[1] == '-d':
     map_path = sys.argv[2]
     if os.path.exists(map_path):
         result = read_map_data(map_path)
-        sys.stdout.write(json.dumps(result))
+        fp = os.fdopen(sys.stdout.fileno(), 'wb')
+        fp.write(pickle.dumps(result))
 
 elif sys.argv[1] == '-l':
     map_glob_expression = sys.argv[2]
     map_filenames = glob.glob(map_glob_expression)
-    result = map(map_filename_to_map_name, map_filenames)
-    sys.stdout.write(json.dumps(result))
+    result = list(map(map_filename_to_map_name, map_filenames))
+    fp = os.fdopen(sys.stdout.fileno(), 'wb')
+    fp.write(pickle.dumps(result))

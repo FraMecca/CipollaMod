@@ -1,4 +1,4 @@
-from zope.interface import implements
+from zope.interface import implementer
 
 from twisted.plugin import IPlugin
 from twisted.application import service
@@ -8,7 +8,7 @@ from spyd.wrapper_service import WrapperService
 
 class SpydServiceMaker(object):
 
-    implements(service.IServiceMaker, IPlugin)
+    implementer(service.IServiceMaker, IPlugin)
     
     tapname = "spyd"
     description = "A Sauerbraten server."

@@ -56,7 +56,7 @@ class TestFormattedSauerbratenMessageSplitter(unittest.TestCase):
 
         chunks = fsms.split(message)
 
-        self.assertChunksOk(max_length=max_length, chunks=chunks, expected=[u'Hello', u'world'])
+        self.assertChunksOk(max_length=max_length, chunks=chunks, expected=['Hello', 'world'])
 
 
     def test_split_continued_coloring(self):

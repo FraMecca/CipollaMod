@@ -36,7 +36,7 @@ class VSlot(object):
 def load_vslot(f, index, changed):
     vs = VSlot(index)
     numparams = readushort(f)
-    for i in xrange(numparams):
+    for i in range(numparams):
         nlen = readushort(f)
         name = f.read(nlen)
         p = ShaderParam(name, shader_param_types.SHPARAM_LOOKUP)

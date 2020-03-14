@@ -22,7 +22,7 @@ class ResumeCountdown(object):
     def start(self):
         if self._state != states.NOT_STARTED:
             raise StateError()
-        for seconds_left in xrange(1, int(self._seconds)):
+        for seconds_left in range(1, int(self._seconds)):
             self._delayed_calls.append(self.clock.callLater(self._seconds - seconds_left, self._tick, seconds_left))
         self._delayed_calls.append(self.clock.callLater(self._seconds, self._ended))
         self._state = states.RUNNING

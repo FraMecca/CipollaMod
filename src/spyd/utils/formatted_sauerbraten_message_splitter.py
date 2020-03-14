@@ -7,8 +7,8 @@ RESTORE = ord('r')
 DEFAULT = ord('7')
 COLORS = {ord(c) for c in '01234567'}
 
-adjacent_color_pattern = re.compile(r'\f[0-7](\f[0-7])')
-adjacent_color_replacement = r'\1'
+adjacent_color_pattern = re.compile(r'\f[0-7](\f[0-7])'.encode('utf-8'))
+adjacent_color_replacement = r'\1'.encode('utf-8')
 
 def get_last_color(chunk):
     pos = chunk.rfind('\f')

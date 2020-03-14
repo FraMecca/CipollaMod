@@ -27,11 +27,11 @@ class ClientPlayerCollection(object):
         self.players[player.pn] = player
 
     def cleanup_players(self):
-        for player in self.players.itervalues():
+        for player in self.players.values():
             reactor.callLater(60, self._cleanup_player, player)
 
     def _cleanup_player(self, player):
         player.cleanup()
 
     def player_iter(self):
-        return self.players.itervalues()
+        return iter(self.players.values())

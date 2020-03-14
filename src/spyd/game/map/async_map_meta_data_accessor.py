@@ -1,4 +1,4 @@
-import json
+import pickle
 import os.path
 import sys
 
@@ -11,7 +11,7 @@ map_data_reader_filename = os.path.join(os.path.dirname(__file__), 'map_data_rea
 def run_map_data_reader_process(args):
     args.insert(0, map_data_reader_filename)
     deferred = utils.getProcessOutput(sys.executable, args, env={'PYTHONPATH': os.environ.get('PYTHONPATH', '')})
-    deferred.addCallback(json.loads)
+    deferred.addCallback(pickle.loads)
     return deferred
 
 def get_map_names(map_glob_expression):
@@ -49,7 +49,7 @@ class AsyncMapMetaDataAccessor(object):
             return defer.succeed(self._map_name_cache)
         else:
             def cache_map_names(map_names):
-                self._map_name_cache = list_to_unicode(map_names)
+                self._map_name_cache = map_names
                 return self._map_name_cache
 
             map_glob_expression = os.path.join(self.package_dir, "base", "*.ogz")

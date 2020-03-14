@@ -44,7 +44,7 @@ class MapLoadReadyUpController(object):
 
     def _check_update(self):
         if self.use_timeout and time.time() > self.timeout:
-            player_names = map(lambda c: c.get_player().__format__(None), self.wait_clients)
+            player_names = [c.get_player().__format__(None) for c in self.wait_clients]
             player_name_str = listjoin(player_names)
             self.room.server_message(smf.format("Waiting for {player_name_str} to load the map took too long. Starting without them.", player_name_str=player_name_str))
 
@@ -53,7 +53,7 @@ class MapLoadReadyUpController(object):
 
         if len(self.wait_clients) and self.changed:
             self.changed = False
-            player_names = map(lambda c: c.get_player().__format__(None), self.wait_clients)
+            player_names = [c.get_player().__format__(None) for c in self.wait_clients]
             player_name_str = listjoin(player_names)
             self.room.server_message(smf.format("Waiting for {player_name_str} to load the map.", player_name_str=player_name_str))
 

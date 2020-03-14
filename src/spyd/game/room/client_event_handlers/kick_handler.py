@@ -16,7 +16,7 @@ class KickHandler(object):
     def handle(room, client, target_pn, reason):
         # TODO: Permissions checks
 
-        print client, target_pn, reason
+        print(client, target_pn, reason)
 
         target_client = room.get_client(target_pn)
 

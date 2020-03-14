@@ -18,6 +18,6 @@ class GroupsCommand(CommandBase):
         else:
             target = client
             
-        formatted_groups = ", ".join(map(lambda group: smf.format("{value#group}", group=group), target._client_permissions.get_group_names()))
+        formatted_groups = ", ".join([smf.format("{value#group}", group=group) for group in target._client_permissions.get_group_names()])
 
         client.send_server_message(info("groups: {formatted_groups}", formatted_groups=formatted_groups))

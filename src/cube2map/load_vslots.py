@@ -12,7 +12,7 @@ def load_vslots(f, numvslots):
     while vs > 0:
         changed = readint(f)
         if changed < 0:
-            for _ in xrange(-changed):
+            for _ in range(-changed):
                 index = len(vslots)
                 vslots.append(VSlot(index))
             vs += changed
@@ -22,7 +22,7 @@ def load_vslots(f, numvslots):
             vslots.append(load_vslot(f, index, changed))
             vs -= 1
             
-    for i in xrange(len(vslots)):
+    for i in range(len(vslots)):
         if prev[i] < len(vslots):
             vslots[prev[i]].next = vslots[i]
             

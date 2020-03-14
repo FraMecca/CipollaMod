@@ -17,6 +17,6 @@ class CommandsCommand(CommandBase):
     def execute(cls, spyd_server, room, client, command_string, arguments, raw_args):
         available_commands = room.command_executer.get_available_commands(client)
 
-        formatted_command_list = map(format_cmd, available_commands)
+        formatted_command_list = list(map(format_cmd, available_commands))
 
         client.send_server_message("\f7Commands: " + " | ".join(formatted_command_list))

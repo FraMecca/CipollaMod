@@ -15,7 +15,7 @@ def simpleMaskedIpToLongIpAndMask(masked_ip):
     
     parts = masked_ip.split('.')
     
-    for i in xrange(len(parts)):
+    for i in range(len(parts)):
         ip[i] = parts[i]
         mask[i] = '255'
 

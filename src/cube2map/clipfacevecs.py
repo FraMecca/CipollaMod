@@ -60,13 +60,13 @@ def clipfacevecs(o, numo, cx, cy, size, rvecs):
 
     r = 0;
     prev = o[numo-1];
-    for i in xrange(numo):
+    for i in range(numo):
         cur = o[i]
         r += clipfacevec(prev, facevec(cur.x-prev.x, cur.y-prev.y), cx, cy, size, rvecs[r]);
         prev = cur
     
     corner = [facevec(cx, cy), facevec(cx+size, cy), facevec(cx+size, cy+size), facevec(cx, cy+size)];
-    for i in xrange(4):
+    for i in range(4):
         if insideface(corner[i], 1, o, numo):
             rvecs[r] = corner[i]
             r += 1

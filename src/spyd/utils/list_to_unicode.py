@@ -1,6 +1,6 @@
 def to_unicode(i):
-    if not isinstance(i, unicode):
-        i = unicode(i, 'utf_8')
+    if not isinstance(i, str):
+        i = str(i, 'utf_8')
     return i
 
 def list_to_unicode(l):

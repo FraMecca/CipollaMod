@@ -29,13 +29,13 @@ from cube2map.load_vslots import load_vslots
 from cube2map.CubeMap import CubeMap
 
 def convertoldsurfaces(c, co, size, srcsurfs, hassurfs, normals, hasnorms, merges, hasmerges):
-    dstsurfs = map(lambda _: SurfaceInfo(), xrange(6))
-    verts = map(lambda _: VertInfo(), xrange(6*2*layer_types.MAXFACEVERTS))
+    dstsurfs = [SurfaceInfo() for _ in range(6)]
+    verts = [VertInfo() for _ in range(6*2*layer_types.MAXFACEVERTS)]
     
     totalverts = 0
     numsurfs = 6
     
-    for i in xrange(6):
+    for i in range(6):
         if (hassurfs|hasnorms|hasmerges)&(1<<i):
             dst = dstsurfs[i]
             curverts = None
@@ -77,8 +77,8 @@ def convertoldsurfaces(c, co, size, srcsurfs, hassurfs, normals, hasnorms, merge
             
             if uselms or usemerges or usenorms:
             
-                v = map(lambda _: ivec(), xrange(4))
-                pos = map(lambda _: ivec(), xrange(4))
+                v = [ivec() for _ in range(4)]
+                pos = [ivec() for _ in range(4)]
                 
                 e1 = ivec()
                 e2 = ivec()
@@ -102,7 +102,7 @@ def convertoldsurfaces(c, co, size, srcsurfs, hassurfs, normals, hasnorms, merge
                     vc = C[dim]
                     vr = R[dim]
                     
-                    for k in xrange(4):
+                    for k in range(4):
                     
                         coords = facecoords[i][k]
                         if coords[vc]:
@@ -156,7 +156,7 @@ def convertoldsurfaces(c, co, size, srcsurfs, hassurfs, normals, hasnorms, merge
                 
                 curverts = verts + totalverts;
                 
-                for k in xrange(4):
+                for k in range(4):
                     if k > 0 and (pos[k] == pos[0] or pos[k] == pos[k-1]): continue
                     dv = curverts[numverts]
                     numverts += 1
@@ -182,7 +182,7 @@ def convertoldsurfaces(c, co, size, srcsurfs, hassurfs, normals, hasnorms, merge
                 dst.numverts |= numverts;
                 totalverts += numverts;
                 if dst.numverts & layer_types.LAYER_DUP:
-                    for k in xrange(4):
+                    for k in range(4):
                         if k > 0 and (pos[k] == pos[0] or pos[k] == pos[k-1]): continue
                         bv = verts[totalverts]
                         totalverts += 1
@@ -235,9 +235,9 @@ def loadc(version, f, cube, co, size):
             else:
                 cube.material = convertoldmaterial(mat)
                 
-        surfaces = map(lambda _: SurfaceCompat(), xrange(12))
-        normals = map(lambda _: NormalsCompat(), xrange(6))
-        merges = map(lambda _: MergesCompat(), xrange(6))
+        surfaces = [SurfaceCompat() for _ in range(12)]
+        normals = [NormalsCompat() for _ in range(6)]
+        merges = [MergesCompat() for _ in range(6)]
         
         hassurfs = 0
         hasnorms = 0
@@ -286,7 +286,7 @@ def loadc(version, f, cube, co, size):
                     if mask:
                         hasmerges = mask&0x3F
                         
-                        for i in xrange(6):
+                        for i in range(6):
                             if mask&(1<<i):
                                 merges[i] = MergesCompat.read(f)
                                 m = merges[i]
@@ -317,12 +317,12 @@ def loadc(version, f, cube, co, size):
             
             newcubeext(cube, totalverts, False)
             
-            cube.ext.surfaces = map(lambda _: SurfaceInfo(), xrange(6))
-            cube.ext.verts = map(lambda _: VertInfo(), xrange(cube.ext.maxverts))
+            cube.ext.surfaces = [SurfaceInfo() for _ in range(6)]
+            cube.ext.verts = [VertInfo() for _ in range(cube.ext.maxverts)]
             
             offset = 0
             
-            for i in xrange(6):
+            for i in range(6):
                 if surfmask & (1<<i):
                     cube.ext.surfaces[i] = SurfaceInfo.read(f)
                     surf = cube.ext.surfaces[i]
@@ -341,7 +341,7 @@ def loadc(version, f, cube, co, size):
                     verts = cube.ext.verts[offset/12:]
                     offset += numverts
                     
-                    v = map(lambda _: ivec(), xrange(4))
+                    v = [ivec() for _ in range(4)]
                     n = 0
                     
                     layerverts = surf.numverts & layer_types.MAXFACEVERTS
@@ -456,12 +456,12 @@ def loadc(version, f, cube, co, size):
                     if hasnorm and vertmask & 0x08:
                     
                         norm = readushort(f)
-                        for k in xrange(layerverts):
+                        for k in range(layerverts):
                             verts[k].norm = norm
                         hasnorm = False
                     
                     if hasxyz or hasuv or hasnorm:
-                        for k in xrange(layerverts):
+                        for k in range(layerverts):
                             v = verts[k]
                             if hasxyz:
                             
@@ -478,7 +478,7 @@ def loadc(version, f, cube, co, size):
                                 v.norm = readushort(f)
                     
                     if surf.numverts & layer_types.LAYER_DUP:
-                        for k in xrange(layerverts):
+                        for k in range(layerverts):
                             v = verts[k+layerverts]
                             t = verts[k]
                             
@@ -498,7 +498,7 @@ def loadc(version, f, cube, co, size):
 
 def loadchildren(version, f, co, size):
     cubes = newcubes()
-    for i in xrange(len(cubes)):
+    for i in range(len(cubes)):
         loadc(version, f, cubes[i], ivec(i, co.x, co.y, co.z, size), size)
     return cubes
 
@@ -549,7 +549,7 @@ def read_map_data(map_filename):
         meta_data['numvars'] = numvars
         meta_data['numvslots'] = numvslots
     
-        for i in xrange(numvars):
+        for i in range(numvars):
             var_type = struct.unpack("b", f.read(1))[0]
             ilen     = struct.unpack("<H", f.read(2))[0]
             var_name = f.read(ilen)
@@ -578,7 +578,7 @@ def read_map_data(map_filename):
             extra_size = struct.unpack("H", f.read(2))[0]
             edata = f.read(extra_size)
             
-        print eif, extra_size, edata
+        print(eif, extra_size, edata)
     
         if version < 14:
             f.read(256)

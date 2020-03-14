@@ -1,12 +1,12 @@
 import enet
 from twisted.internet.interfaces import IReadWriteDescriptor
-from zope.interface import implements
+from zope.interface import implementer
 
 
 handled_enet_events = (enet.EVENT_TYPE_CONNECT, enet.EVENT_TYPE_DISCONNECT, enet.EVENT_TYPE_RECEIVE)
 
 class ENetHost(object):
-    implements(IReadWriteDescriptor)
+    implementer(IReadWriteDescriptor)
 
     def __init__(self, enet_host, factory):
         self._enet_host = enet_host

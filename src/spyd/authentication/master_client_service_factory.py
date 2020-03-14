@@ -20,7 +20,7 @@ class MasterClientServiceFactory(object):
             raise ConfigurationError("Master client type was not specified or was null, please specify a valid 'type' parameter.")
 
         if master_client_type not in self._service_types:
-            raise ConfigurationError("Master client type was not a known value. Allowed types are {!r}".format(self._service_types.keys()))
+            raise ConfigurationError("Master client type was not a known value. Allowed types are {!r}".format(list(self._service_types.keys())))
 
         master_client_class = self._service_types[master_client_type]
 

@@ -72,7 +72,7 @@ def savevslot(f, vs, prev):
         for p in vs.params:
             writeushort(f, len(p.name))
             f.write(p.name)
-            for k in xrange(4):
+            for k in range(4):
                 writeint(p.val[k])
     
     if vs.changed & (1<<vslot_types.VSLOT_SCALE):
@@ -91,25 +91,25 @@ def savevslot(f, vs, prev):
         writefloat(f, vs.alphafront)
         writefloat(f, vs.alphaback)
     if vs.changed & (1<<vslot_types.VSLOT_COLOR):
-        for k in xrange(3):
+        for k in range(3):
             writefloat(f, vs.colorscale[k])
         
 def savevslots(f, vslots):
     numvslots = len(vslots)
     prev = [-1]*numvslots
-    for i in xrange(numvslots):
+    for i in range(numvslots):
         vs = vslots[i]
         if vs.changed: continue
         while 1:
             cur = vs
             while 1:
-                vs = vs.next
+                vs = vs.__next__
                 if vs is None or vs.index < numvslots: break
             if vs is None: break
             prev[vs.index] = cur.index
             
     lastroot = 0
-    for i in xrange(numvslots):
+    for i in range(numvslots):
         vs = vslots[i]
         if vs.changed == 0: continue
         if lastroot < i:
@@ -121,7 +121,7 @@ def savevslots(f, vslots):
 
 def savec(f, cube_map, c, o, size, nolms):
     
-    for i in xrange(8):
+    for i in range(8):
         co = ivec(i, o.x, o.y, o.z, size)
         
         if len(c[i].children) > 0:
@@ -139,7 +139,7 @@ def savec(f, cube_map, c, o, size, nolms):
                     oflags |= 0x80
                     
                 if c[i].ext:
-                    for j in xrange(6):
+                    for j in range(6):
                         surf = c[i].ext.surfaces[j]
                         if not surf.used:
                             continue
@@ -161,7 +161,7 @@ def savec(f, cube_map, c, o, size, nolms):
                 writechar(f, oflags | octa_save_types.OCTSAV_NORMAL)
                 f.write(c[i].data)
     
-            for j in xrange(6):
+            for j in range(6):
                 writeushort(f, c[i].texture_walls[j])
 
             if oflags&0x40:
@@ -174,7 +174,7 @@ def savec(f, cube_map, c, o, size, nolms):
                 writechar(f, surfmask)
                 writechar(f, totalverts)
                 
-                for j in xrange(6):
+                for j in range(6):
                     if surfmask & (1<<j):
                         surf = c[i].ext.surfaces[j]
                         verts = c[i].ext.verts() + surf.verts;
@@ -195,7 +195,7 @@ def savec(f, cube_map, c, o, size, nolms):
                                 vertmask |= 0x04;
                                 if layerverts == 4:
                                     v = [verts[0].getxyz(), verts[1].getxyz(), verts[2].getxyz(), verts[3].getxyz()]
-                                    for k in xrange(4):
+                                    for k in range(4):
                                         v0 = v[k]
                                         
                                         v1 = v[(k+1) & 3]
@@ -215,7 +215,7 @@ def savec(f, cube_map, c, o, size, nolms):
                                     
                             matchnorm = True
                             
-                            for k in xrange(numverts): 
+                            for k in range(numverts): 
                                 v = verts[k]
                                 
                                 if v.u or v.v:
@@ -230,7 +230,7 @@ def savec(f, cube_map, c, o, size, nolms):
                                 vertmask |= 0x08
                                 
                             if vertmask & 0x40 and layerverts == 4:
-                                for k in xrange(4):
+                                for k in range(4):
                                     v0 = verts[k]
                                     
                                     v1 = verts[(k+1)&3]
@@ -301,7 +301,7 @@ def savec(f, cube_map, c, o, size, nolms):
                             hasnorm = False
                             
                         if hasxyz or hasuv or hasnorm:
-                            for k in xrange(layerverts):
+                            for k in range(layerverts):
                                 v = verts[(k+vertorder)%layerverts]
                                 if hasxyz:
                                     xyz = v.getxyz()
@@ -317,7 +317,7 @@ def savec(f, cube_map, c, o, size, nolms):
                                     writeushort(f, v.norm)
                                     
                         if surf.numverts & layer_types.LAYER_DUP:
-                            for k in xrange(layerverts):
+                            for k in range(layerverts):
                                 v = verts[layerverts + (k+vertorder)%layerverts]
                                 if hasuv:
                                     writeushort(f, v.u)

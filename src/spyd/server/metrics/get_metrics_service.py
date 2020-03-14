@@ -49,7 +49,7 @@ def get_metrics_service(config):
     metric_prefix = config.get('metric_prefix', 'spyd')
 
     if enabled and carbon_client_missing:
-        print "Warning: could not import txCarbonClient package. No metrics will be recorded."
+        print("Warning: could not import txCarbonClient package. No metrics will be recorded.")
         enabled = False
 
     if enabled:

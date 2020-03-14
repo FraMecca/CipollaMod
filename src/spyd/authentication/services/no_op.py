@@ -1,6 +1,6 @@
 from twisted.application import service
 from twisted.internet import defer
-from zope.interface import implements
+from zope.interface import implementer
 
 from spyd.authentication.exceptions import AuthFailedException
 from spyd.authentication.interfaces import IAuthService
@@ -9,7 +9,7 @@ from spyd.registry_manager import register
 
 @register("master_client_service", "no_op")
 class NoOpMasterClientService(service.Service):
-    implements(IAuthService)
+    implementer(IAuthService)
     
     def handles_domain(self, auth_domain):
         return True

@@ -9,8 +9,8 @@ class CommandFinder(object):
             self.command_handlers.add(registered_command.registered_object)
     
     def _find_fuzzy(self, room, client, command_string):
-        command_scores = map(lambda ch: ch.get_handles_fuzzy_score(room, client, command_string), self.command_handlers)
-        command_scores = filter(None, command_scores)
+        command_scores = [ch.get_handles_fuzzy_score(room, client, command_string) for ch in self.command_handlers]
+        command_scores = [_f for _f in command_scores if _f]
         
         if not command_scores:
             return None

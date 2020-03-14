@@ -20,7 +20,7 @@ def visibletris(c, cube_map, orient, x, y, z, size, nmat, matmask):
     vis = 3
     touching = 0xF
     
-    e1, e2, e3, n = [ivec() for _ in xrange(4)]
+    e1, e2, e3, n = [ivec() for _ in range(4)]
     
     
     v = [None]*4
@@ -83,8 +83,8 @@ def visibletris(c, cube_map, orient, x, y, z, size, nmat, matmask):
     vo.mask(0xFFF)
     no.mask(0xFFF)
     
-    cf = [facevec() for _ in xrange(4)]
-    of = [facevec() for _ in xrange(4)]
+    cf = [facevec() for _ in range(4)]
+    of = [facevec() for _ in range(4)]
     
     opp = opposite(orient)
     numo = 0
@@ -131,7 +131,7 @@ def visibletris(c, cube_map, orient, x, y, z, size, nmat, matmask):
     ]
 
     while 1:
-        for i in xrange(2):
+        for i in range(2):
             verts = triverts[order][coord][i]
             
             tf = [cf[verts[0]], cf[verts[1]], cf[verts[2]]]

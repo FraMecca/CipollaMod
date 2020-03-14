@@ -18,7 +18,7 @@ class MalformedTimeString(Exception):
 # No decimal support for now
 # strict_token_pattern = re.compile(r'[=+-]\d+(\.\d+)?[{units}]'.format(units=''.join(units.keys())))
 
-strict_token_pattern = re.compile(r'[=+-]\d+[{units}]'.format(units=''.join(units.keys())))
+strict_token_pattern = re.compile(r'[=+-]\d+[{units}]'.format(units=''.join(list(units.keys()))))
 
 def isStrictToken(token):
     """See whether a token has the form '<sign><number><unit>'"""
@@ -120,7 +120,7 @@ def simplify(tokenList):
         # this should only happen after we've concatenated all of the integers and float components
         try:
             float(tokenList[i])
-            assert(tokenList[i + 1] in units.keys())
+            assert(tokenList[i + 1] in list(units.keys()))
             tokenList[i] = tokenList[i] + tokenList[i + 1]
             del tokenList[i + 1]
         except AssertionError:
@@ -138,7 +138,7 @@ def simplify(tokenList):
         # a float followed by a unit designation
         try:
             float(tokenList[i])
-            assert(tokenList[i + 1] in units.keys())
+            assert(tokenList[i + 1] in list(units.keys()))
             tokenList[i] = tokenList[i] + tokenList[i + 1]
             del tokenList[i + 1]
         except AssertionError:
@@ -161,7 +161,7 @@ def simplify(tokenList):
 
         # a unit without a number
         try:
-            assert(tokenList[i] in units.keys())
+            assert(tokenList[i] in list(units.keys()))
             tokenList.insert(i, '1')
             i -= 1
         except ValueError:
@@ -180,7 +180,7 @@ def simplify(tokenList):
         try:
             assert(i == 0)
             float(tokenList[i][:-1])
-            assert(tokenList[i][-1] in units.keys())
+            assert(tokenList[i][-1] in list(units.keys()))
             tokenList.insert(i, '=')
             i += 1
         except AssertionError:
@@ -194,7 +194,7 @@ def simplify(tokenList):
         try:
             assert(not tokenList[i] in signs)
             float(tokenList[i + 1][:-1])
-            assert(tokenList[i + 1][-1] in units.keys())
+            assert(tokenList[i + 1][-1] in list(units.keys()))
             tokenList.insert(i + 1, '=')
         except AssertionError:
             pass
@@ -212,7 +212,7 @@ def simplify(tokenList):
         try:
             assert(tokenList[i] in signs)
             float(tokenList[i + 1][:-1])
-            assert(tokenList[i + 1][-1] in units.keys())
+            assert(tokenList[i + 1][-1] in list(units.keys()))
             tokenList[i] = tokenList[i] + tokenList[i + 1]
             del tokenList[i + 1]
             continue
@@ -288,12 +288,12 @@ def parseTimeString(timeString):
 
     """
     try:
-        tokenList = map(str, timeString)
+        tokenList = list(map(str, timeString))
 
         def notWhiteSpace(string):
             return not string.isspace()
 
-        tokenList = filter(notWhiteSpace, tokenList)
+        tokenList = list(filter(notWhiteSpace, tokenList))
         tokenList = simplify(tokenList)
 
         return parseStrictTokenList(tokenList)

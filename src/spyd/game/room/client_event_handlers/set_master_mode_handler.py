@@ -13,11 +13,12 @@ class SetMasterModeHandler(object):
 
     @staticmethod
     def handle(room, client, mastermode):
-        allowed_set_mastermode = client.allowed(set_mastermode_functionality) or (room.temporary and client.allowed(temporary_set_mastermode_functionality))
+        # allowed_set_mastermode = client.allowed(set_mastermode_functionality) or (room.temporary and client.allowed(temporary_set_mastermode_functionality))
 
-        if not allowed_set_mastermode:
-            raise InsufficientPermissions('Insufficient permissions to change mastermode.')
-
+        # if not allowed_set_mastermode:
+        #     raise InsufficientPermissions('Insufficient permissions to change mastermode.')
+        if mastermode == mastermodes.MM_PRIVATE:
+            raise GenericError("Mastermode private not allowed")
         if mastermode < mastermodes.MM_OPEN or mastermode > mastermodes.MM_PRIVATE:
             raise GenericError("Mastermode out of allowed range.")
 

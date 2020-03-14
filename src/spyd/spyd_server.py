@@ -8,7 +8,7 @@ from txCascil.events import EventSubscriptionFulfiller
 
 from cube2common.constants import disconnect_types
 from cube2protocol.sauerbraten.collect.server_read_message_processor import ServerReadMessageProcessor
-from server.lan_info.lan_info_service import LanInfoService
+from .server.lan_info.lan_info_service import LanInfoService
 from spyd.authentication.auth_world_view_factory import AuthWorldViewFactory, ANY
 from spyd.authentication.master_client_service_factory import MasterClientServiceFactory
 from spyd.game.client.client_factory import ClientFactory
@@ -47,7 +47,7 @@ class SpydServer(object):
 
         sauerbraten_package_dir = get_package_dir(config)
         map_meta_data_accessor = AsyncMapMetaDataAccessor(sauerbraten_package_dir)
-        print "Using package directory; {!r}".format(sauerbraten_package_dir)
+        print("Using package directory; {!r}".format(sauerbraten_package_dir))
 
         self.event_subscription_fulfiller = EventSubscriptionFulfiller()
 
@@ -90,7 +90,7 @@ class SpydServer(object):
 
         max_duplicate_peers = config.get('max_duplicate_peers', 10)
 
-        for room_name, room_config in config['room_bindings'].iteritems():
+        for room_name, room_config in config['room_bindings'].items():
             interface = room_config['interface']
             port = room_config['port']
             maxclients = room_config['maxclients']
@@ -122,7 +122,7 @@ class SpydServer(object):
             message_handlers[message_handler.msgtype] = message_handler
 
         gep_service_factory = txCascil.ServerServiceFactory()
-        for gep_config in config['gep_endpoints'].itervalues():
+        for gep_config in config['gep_endpoints'].values():
             gep_service = gep_service_factory.build_service(self, gep_config, message_handlers, self.permission_resolver, self.event_subscription_fulfiller)
             gep_service.setServiceParent(self.root_service)
 
@@ -132,7 +132,7 @@ class SpydServer(object):
         reactor.callLater(0.1, logger.spyd_event, "Shutting down in {} seconds to allow clients to disconnect.".format(shutdown_countdown))
         self.client_protocol_factory.disconnect_all(disconnect_type=disconnect_types.DISC_NONE, message=notice("Server going down. Please come back when it is back up."))
 
-        for i in xrange(shutdown_countdown):
+        for i in range(shutdown_countdown):
             reactor.callLater(shutdown_countdown - i, logger.spyd_event, "{}...".format(i))
         d = defer.Deferred()
         reactor.callLater(shutdown_countdown + 0.1, d.callback, 1)

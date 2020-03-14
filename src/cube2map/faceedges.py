@@ -13,5 +13,5 @@ faceedgesidx = [ # ordered edges surrounding each orient
 ]
 
 def faceedges(c, orient, edges):
-    for k in xrange(4):
+    for k in range(4):
         edges[k] = c.edges[faceedgesidx[orient][k]];

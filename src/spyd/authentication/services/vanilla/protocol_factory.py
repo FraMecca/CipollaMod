@@ -56,7 +56,7 @@ class MasterClientProtocolFactory(ReconnectingClientFactory):
         if self.active_connection is None:
             return defer.fail(AuthFailedException("No Master server connection."))
 
-        context = AuthenticationContext(self._auth_id.next(), auth_domain, authname)
+        context = AuthenticationContext(next(self._auth_id), auth_domain, authname)
         self.active_connection.send_reqauth(context.auth_id, context.auth_name)
         self.pending_auths[context.auth_id] = context
         context.timeout_deferred = self.clock.callLater(5, self._auth_timeout, context)
