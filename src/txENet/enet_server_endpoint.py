@@ -3,7 +3,7 @@ from twisted.internet.interfaces import IStreamServerEndpoint
 from zope.interface import implements
 
 from txENet.enet_host import ENetHost
-from twisted.python import log, _reflectpy3 as reflect
+from twisted.python import log
 
 
 class ENetServerEndpoint(object):
@@ -41,4 +41,4 @@ class ENetServerEndpoint(object):
         return self._enet_host.flush()
     
     def _getLogPrefix(self):
-        return reflect.qual(self._factory.__class__)
+        pass
