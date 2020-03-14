@@ -4,6 +4,7 @@ from twisted.application import service
 carbon_client_missing = True
 try:
     from txCarbonClient import CarbonClientService
+    # TODO: decide if remove completely and write alternative
     carbon_client_missing = False
 except ImportError:
     class CarbonClientService:
