@@ -6,6 +6,8 @@ try:
     from txCarbonClient import CarbonClientService
     carbon_client_missing = False
 except ImportError:
+    class CarbonClientService:
+        pass
     pass
 
 class NoOpRepeatingMetricHandle(object):
