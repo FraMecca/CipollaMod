@@ -6,7 +6,6 @@ class Team(object):
         self.score = 0
         self.oflags = 0
         self.frags = 0
-        self.size = 0
 
 class NullTeam(object):
     def __init__(self):
@@ -16,4 +15,3 @@ class NullTeam(object):
         self.score = 0
         self.oflags = 0
         self.frags = 0
-        self.size = 0

@@ -1,15 +1,12 @@
 from cube2common.constants import armor_types
-from spyd.game.gamemode.bases.fighting_base import FightingBase
-from spyd.game.gamemode.bases.mode_base import ModeBase
-from spyd.game.gamemode.bases.spawning_base import SpawningBase
-from spyd.game.gamemode.bases.spectating_base import SpectatingBase
+from spyd.game.gamemode.bases.mode_base import make_multidispatch, extract_public_methods
 from spyd.game.gamemode.bases.tactics_base import TacticsBase
 from spyd.game.gamemode.bases.teamplay_base import TeamplayBase
 from spyd.registry_manager import register
 
 
-@register('gamemode')
-class TacticsTeam(ModeBase, FightingBase, TacticsBase, SpawningBase, SpectatingBase, TeamplayBase):
+# @register('gamemode')
+class TacticsTeam(TacticsBase, TeamplayBase):
     isbasemode = True
     clientmodename = 'tacteam'
     clientmodenum = 8
@@ -23,3 +20,12 @@ class TacticsTeam(ModeBase, FightingBase, TacticsBase, SpawningBase, SpectatingB
     spawnhealth = 100
     spawndelay = 0
     hasbases = False
+
+    def __init__(self, room, map_meta_data):
+        self.teamBase = TeamplayBase(room, map_meta_data)
+        self.tacticsBase = TacticsBase(room, map_meta_data)
+
+        dispatch = make_multidispatch(self.teamBase, self.tacticsBase)
+        methods = extract_public_methods(self.teamBase).union(extract_public_methods(self.tacticsBase))
+        for meth in methods:
+            setattr(self, meth, dispatch(meth))

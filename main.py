@@ -1,14 +1,16 @@
 import sys
 
-print('TODO: PYTHONPATH alternative')
-
 import spyd.wrapper_service
 import spyd.options
+from spyd.utils.tracing import setup_logger
+
+setup_logger('tracing.log')
+
+# TODO: PYTHONPATH alternative
 
 opt = spyd.options.Options()
 opt.parseOptions(sys.argv[1:])
 
-print(opt)
 w = spyd.wrapper_service.WrapperService(opt)
 w.startService()
 

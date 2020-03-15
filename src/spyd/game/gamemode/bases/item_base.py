@@ -1,9 +1,13 @@
 from spyd.protocol import swh
 from cube2common.constants import item_types
 from spyd.game.map.item import Item, UnusedItemSlot
+from spyd.game.gamemode.bases.mode_base import ModeBase
 
-class ItemBase(object):
+# TODO: does not pickup
+
+class ItemBase(ModeBase):
     def __init__(self, room, map_meta_data):
+        super().__init__(room, map_meta_data)
         self.room = room
         
         self.items = None
@@ -16,25 +20,33 @@ class ItemBase(object):
                     item_list.append(item_dict)
     
             self._load_item_list(item_list)
+            
         
     @property
     def got_items(self):
         return self.items is not None
+    
             
     def initialize_player(self, cds, player):
+        super().initialize_player(cds, player)
         if self.items is not None:
             swh.put_itemlist(cds, self.items)
 
+
     def on_player_item_list(self, player, item_list):
+        super().on_player_item_list(player, item_list)
         if not self.got_items:
             self._load_item_list(item_list)
 
+
     def on_player_pickup_item(self, player, item_index):
+        super().on_player_pickup_item(player, item_index)
         if self.items is None: return
         if item_index < len(self.items) and item_index >= 0:
             item = self.items[item_index]
             if isinstance(item, Item):
                 item.pickup(player)
+
 
     def _load_item_list(self, item_list):
         self.items = []
@@ -48,3 +60,6 @@ class ItemBase(object):
             item = Item(self.room, self.room._game_clock, n, item_dict['item_type'])
             self.items.append(item)
             i += 1
+
+from spyd.utils.tracing import trace_class
+trace_class(ItemBase)

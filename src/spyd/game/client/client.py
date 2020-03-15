@@ -244,3 +244,6 @@ class Client(object):
 
     def allowed(self, functionality):
         return self._client_permissions.allowed(functionality)
+
+from spyd.utils.tracing import trace_class
+# trace_class(Client)

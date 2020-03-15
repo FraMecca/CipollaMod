@@ -1,19 +1,21 @@
 from cube2common.constants import game_entity_types, RESETFLAGTIME, DMF
+from spyd.game.timing.expiry import Expiry
 from cube2common.vec import vec
 from spyd.game.map.flag import Flag
 from spyd.game.map.team import Team
 from spyd.protocol import swh
+from spyd.game.gamemode.bases.teamplay_base import TeamplayBase, base_teams
 
 
-class CtfBase(object):
+class CtfBase(TeamplayBase):
     def __init__(self, room, map_meta_data):
+        
+        self.teams = base_teams
+        super().__init__(room, map_meta_data, self.teams)
+
         self.room = room
         self._game_clock = room._game_clock
         
-        good = Team(0, 'good')
-        evil = Team(1, 'evil')
-        
-        self.teams = [good, evil]
         
         self.flags = None
 
@@ -32,28 +34,19 @@ class CtfBase(object):
         return self.flags is not None
     
     def on_player_connected(self, player):
+        super().on_player_connected(player)
         if not player.isai:
             with player.sendbuffer(1, True) as cds:
                 swh.put_initflags(cds, self.scores, self.flags or ())
     
     def on_player_disconnected(self, player):
+        super().on_player_disconnected(player)
         self.on_player_try_drop_flag(player)
         if player.team is not None:
-            player.team.size -= 1
             player.team = None
         
-    def initialize_player(self, cds, player):
-        if player.state.is_spectator: return
-        smallest_team = min(self.teams, key=lambda t: t.size)
-        player.team = smallest_team
-        player.team.size += 1
-        swh.put_setteam(cds, player, -1)
-        
     def _get_team(self, name):
-        for team in self.teams:
-            if team.name == name:
-                return team
-        return None
+        return self.teams.get(name, None)
         
     def _score_flag(self, player, goal_flag, relay_flag):
         self.scores[goal_flag.id] += 1
@@ -92,6 +85,7 @@ class CtfBase(object):
                 return flag
     
     def on_player_take_flag(self, player, flag_index, version):
+        super().on_player_take_flag(player, flag_index, version)
         if player.state.is_spectator: return
         if not player.state.is_alive: return
         
@@ -108,7 +102,7 @@ class CtfBase(object):
             
         if flag.version != version:
             return
-            
+
         if flag.team is player.team:
             # if the flag was dropped, then return it
             if flag.dropped:
@@ -135,6 +129,7 @@ class CtfBase(object):
         return True
     
     def on_player_try_drop_flag(self, player):
+        super().on_player_try_drop_flag(player)
         for flag in self.flags or ():
             if flag.owner is player:
                 flag.drop(player.state.pos.copy(), RESETFLAGTIME / 1000.0)
@@ -142,11 +137,31 @@ class CtfBase(object):
                 with self.room.broadcastbuffer(1, True) as cds:
                     swh.put_dropflag(cds, player, flag)
         return True
+
+    def owns_flag(self, player):
+        for flag in self.flags or ():
+            if flag.owner is player:
+                return True, flag
+        return False, None
         
     def on_player_death(self, player, killer):
-        self.on_player_try_drop_flag(player)
+        hasflag, flag = self.owns_flag(killer)
+        print(hasflag)
+        # if  hasflag and player is not killer and player._team is killer._team:
+        #     print('rugby')
+        #     self.on_player_try_drop_flag(killer)
+        #     flag.owner = player
+        #     with self.room.broadcastbuffer(1, True) as cds:
+        #         swh.put_takeflag(cds, player, flag)
+        #     # import IPython; IPython.embed()
+        # else:
+        if True:
+            self.on_player_try_drop_flag(player)
+            super().on_player_death(player, killer)
+        print('done')
         
     def _teamswitch_suicide(self, player):
+        super()._teamswitch_suicide(player)
         if not player.state.is_alive: return
         player.state.suicide()
         with self.room.broadcastbuffer(1, True) as cds:
@@ -154,6 +169,7 @@ class CtfBase(object):
         self.on_player_death(player, player)
 
     def on_player_flag_list(self, player, flag_list):
+        super().on_player_flag_list(player, flag_list)
         if not self.got_flags:
             self._load_flag_list(flag_list)
     
@@ -161,13 +177,14 @@ class CtfBase(object):
         fid = 0
         self.flags = []
         for flag_dict in flag_list:
-            team = self.teams[flag_dict['team']-1]
+            team = list(self.teams.values())[flag_dict['team']-1]
             spawn_loc = vec(flag_dict['x'], flag_dict['y'], flag_dict['z'])
             flag = Flag(game_clock=self.room._game_clock, fid=fid, spawn_loc=spawn_loc, team=team)
             fid += 1
             self.flags.append(flag)
     
     def on_player_try_set_team(self, player, target, old_team_name, new_team_name):
+        super().on_player_try_set_team(player, target, old_team_name, new_team_name)
         team = self._get_team(new_team_name)
         if team is None: return
         
@@ -182,5 +199,7 @@ class CtfBase(object):
             else:
                 reason = 1
             target.team = team
-            target.team.size += 1
             swh.put_setteam(cds, target, reason)
+
+from spyd.utils.tracing import trace_class
+trace_class(CtfBase)

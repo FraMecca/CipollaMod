@@ -6,20 +6,18 @@ from twisted.internet import reactor
 from cube2common.constants import weapon_types, armor_types, DMF, guns, EXP_SELFDAMDIV, EXP_DISTSCALE, DNF, client_states
 from cube2common.utils.enum import enum
 from cube2common.vec import vec
-from spyd.game.gamemode.bases.fighting_base import FightingBase
 from spyd.game.gamemode.bases.mode_base import ModeBase
-from spyd.game.gamemode.bases.spawning_base import SpawningBase
-from spyd.game.gamemode.bases.spectating_base import SpectatingBase
 from spyd.game.server_message_formatter import info
 from spyd.game.timing.expiry import Expiry
 from spyd.protocol import swh
 from spyd.registry_manager import register
 
+# TODO: rivedere e riscrivere
 
 tist_states = enum('UNINITIALIZED', 'WAITING_PLAYERS', 'WAITING_TRAITOR', 'PLAYING')
 
-@register('gamemode')
-class Traitors(ModeBase, FightingBase, SpawningBase, SpectatingBase):
+# @register('gamemode')
+class Traitors(ModeBase):
     isbasemode = False
     clientmodename = 'traitors'
     clientmodenum = 3

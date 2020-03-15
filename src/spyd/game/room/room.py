@@ -128,6 +128,20 @@ class Room(object):
         return self._players.to_iterator()
 
     @property
+    def teams_size(self):
+        from spyd.game.gamemode.bases.teamplay_base import base_teams
+        teams = {team.name: (len(players), team, players) for team, players in self._players.by_team().items()}
+
+        # add base teams
+        if 'good' not in teams:
+            teams['good'] = (0, base_teams['good'], [])
+        if 'evil' not in teams:
+            teams['evil'] = (0, base_teams['evil'], [])
+
+        return teams
+
+
+    @property
     def playing_count(self):
         count = 0
         for player in self.players:
