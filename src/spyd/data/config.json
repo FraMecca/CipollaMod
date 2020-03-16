@@ -1,7 +1,7 @@
 {
     "server_name": "Spyd Server",
     "server_info": "This server runs Spyd. Use {orange}#commands{white} to see available commands. See {blue}https://github.com/fdChasm/spyd{white} for more info.",
-    "packages_directory": "/home/user/sauerbraten/packages",
+    "packages_directory": "/home/user/Downloads/sauerbraten/sauerbraten/packages",
     "connect_auth_domain": "",
     "default_room": "lobby",
     "room_bindings": {
@@ -20,7 +20,8 @@
             "interface": "0.0.0.0",
             "maxup": 0,
             "port": 28785,
-            "maxplayers": 24
+            "maxplayers": 24,
+            "adminpass": "password"
         }
     },
     "lan_findable": true,

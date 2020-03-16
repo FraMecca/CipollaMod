@@ -109,7 +109,6 @@ class Client(object):
         player = Player(self, self.cn, name, playermodel)
         self.add_player(player)
 
-        print(message)
         pwdhash = message['pwdhash']
         authdomain = message['authdomain']
         authname = message['authname']

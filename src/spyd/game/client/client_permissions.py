@@ -1,7 +1,6 @@
 from cube2common.constants import privileges
 
 
-
 class ClientPermissions(object):
     def __init__(self, permission_resolver):
         self._permission_resolver = permission_resolver

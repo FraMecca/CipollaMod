@@ -3,16 +3,16 @@ class RegistryManager(object):
     # key: registry name
     # value: Registration
     registries = {}
-        
+
     @classmethod
     def register(cls, registry_name, registered_object, args, kwargs):
         if registry_name not in cls.registries:
             cls.registries[registry_name] = []
-            
+
         registry = cls.registries[registry_name]
-        
+
         registry.append(Registration(registered_object, args, kwargs))
-        
+
     @classmethod
     def get_registrations(cls, registry_name):
         return cls.registries.get(registry_name, ())

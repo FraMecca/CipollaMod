@@ -47,3 +47,6 @@ class CommandExecuter(object):
         command_list = self._command_finder.get_command_list()
         command_list = [c for c in command_list if client.allowed(c.functionality)]
         return command_list
+
+from spyd.utils.tracing import trace_class
+trace_class(CommandExecuter)
