@@ -1,7 +1,6 @@
 from spyd.registry_manager import register
 from spyd.game.client.exceptions import GenericError
-
-ADMIN_PASS = "test"
+from spyd.config_loader import config_loader
 
 
 class WrongCredentials(GenericError):
@@ -14,11 +13,10 @@ class AuthPassHandler(object):
 
     @staticmethod
     def handle(room, client, message):
-        assert len(message) == 1
-
         passw = message[0]
+        admin_pass = config_loader('config.json')['room_bindings'][room._name.value]['adminpass']
 
-        if passw == ADMIN_PASS:
+        if passw == admin_pass:
             room._client_change_privilege(client, client, 3)
         else:
             raise WrongCredentials("Eheh, try again :)")

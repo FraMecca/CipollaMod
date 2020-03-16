@@ -1,8 +1,6 @@
 from spyd.registry_manager import register
 from spyd.game.client.exceptions import GenericError
 
-ADMIN_PASS = "test"
-
 
 class WrongCredentials(GenericError):
     pass
