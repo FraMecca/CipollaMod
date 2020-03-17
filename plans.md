@@ -12,3 +12,4 @@
 - dispensa perle di stallman
 - banip and banplayer
 - mod premio motosega
+- Fine partita: stats: DeadEye, LoneWolf, Pursuer, FragsMonger, Champion, rugby?

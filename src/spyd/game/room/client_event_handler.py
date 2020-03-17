@@ -170,13 +170,8 @@ class ClientEventHandler(object):
         target_client.disconnect(disconnect_types.DISC_KICK, error("You were kicked by {name#kicker}", kicker=target_client))
 
     def on_map_vote(self, room, client, map_name, mode_num):
-        if not client.allowed(set_map_mode_functionality):
-            raise InsufficientPermissions(set_map_mode_functionality.denied_message)
-
         mode_name = get_mode_name_from_num(mode_num)
-
         map_name = yield resolve_map_name(room, map_name)
-
         room.change_map_mode(map_name, mode_name)
 
     def on_set_demo_recording(self, room, client, value):

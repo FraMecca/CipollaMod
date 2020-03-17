@@ -10,13 +10,11 @@ from spyd.game.gamemode.bases.mode_base import ModeBase
 from spyd.game.server_message_formatter import info
 from spyd.game.timing.expiry import Expiry
 from spyd.protocol import swh
-from spyd.registry_manager import register
 
 # TODO: rivedere e riscrivere
 
 tist_states = enum('UNINITIALIZED', 'WAITING_PLAYERS', 'WAITING_TRAITOR', 'PLAYING')
 
-# @register('gamemode')
 class Traitors(ModeBase):
     isbasemode = False
     clientmodename = 'traitors'

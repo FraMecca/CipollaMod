@@ -3,7 +3,6 @@ from spyd.game.command.command_base import CommandBase
 from spyd.game.gamemode import gamemodes
 from spyd.permissions.functionality import Functionality
 from spyd.registry_manager import register
-from spyd.game.room.client_event_handlers.map_vote_handler import set_map_mode_functionality
 from twisted.internet import defer
 from spyd.game.map.resolve_map_name import resolve_map_name
 
@@ -22,9 +21,6 @@ class ChangeMapCommand(CommandBase):
     @classmethod
     @defer.inlineCallbacks
     def execute(cls, spyd_server, room, client, command_string, arguments, raw_args):
-        if not client.allowed(set_map_mode_functionality):
-            raise InsufficientPermissions(set_map_mode_functionality.denied_message)
-
         mode_name = command_string
         map_name = arguments[0]
 

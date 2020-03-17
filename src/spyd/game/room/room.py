@@ -5,7 +5,6 @@ from twisted.internet import reactor, defer
 
 from cube2common.constants import MAXROOMLEN, MAXSERVERDESCLEN, MAXSERVERLEN, mastermodes, privileges
 from cube2demo.no_op_demo_recorder import NoOpDemoRecorder
-from spyd.game.awards import display_awards
 from spyd.game.client.exceptions import InsufficientPermissions, GenericError
 from spyd.game.room.client_collection import ClientCollection
 from spyd.game.room.client_event_handler import ClientEventHandler
@@ -32,7 +31,7 @@ class Room(object):
     * Accessors to query the state of the room.
     * Setters to modify the state of the room.
     '''
-    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, command_executer=None, maxplayers=None, show_awards=True, demo_recorder=None):
+    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, command_executer=None, maxplayers=None, demo_recorder=None):
         self._game_clock = GameClock()
         self._attach_game_clock_event_handlers()
 
@@ -56,8 +55,6 @@ class Room(object):
 
         self.temporary = False
         self.decommissioned = False
-
-        self.show_awards = show_awards
 
         self.demo_recorder = RoomDemoRecorder(self, demo_recorder or NoOpDemoRecorder())
 
@@ -348,8 +345,6 @@ class Room(object):
     def _on_game_clock_intermission(self):
         self._finalize_demo_recording()
         self._broadcaster.intermission()
-        if self.show_awards:
-            display_awards(self)
 
     def _on_game_clock_intermission_ended(self):
         self._broadcaster.server_message("Intermission has ended.")
