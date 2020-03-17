@@ -11,13 +11,11 @@ from spyd.authentication.auth_world_view_factory import AuthWorldViewFactory, AN
 from spyd.authentication.master_client_service_factory import MasterClientServiceFactory
 from spyd.game.client.client_factory import ClientFactory
 from spyd.game.client.client_number_provider import get_client_number_handle_provider
-from spyd.game.command.command_executer import CommandExecuter
 from spyd.game.map.async_map_meta_data_accessor import AsyncMapMetaDataAccessor
 from spyd.game.room.room_bindings import RoomBindings
 from spyd.game.room.room_factory import RoomFactory
 from spyd.game.room.room_manager import RoomManager
 from spyd.game.server_message_formatter import notice
-from spyd.permissions.permission_resolver import PermissionResolver
 from spyd.punitive_effects.punitive_model import PunitiveModel
 from spyd.registry_manager import RegistryManager
 from spyd.server.binding.binding_service import BindingService
@@ -43,13 +41,9 @@ class SpydServer(object):
         print("Using package directory; {!r}".format(sauerbraten_package_dir))
 
 
-        command_executer = CommandExecuter(self)
-
         self.room_manager = RoomManager()
-        self.room_factory = RoomFactory(config, self.room_manager, self.server_name_model, map_meta_data_accessor, command_executer)
+        self.room_factory = RoomFactory(config, self.room_manager, self.server_name_model, map_meta_data_accessor)
         self.room_bindings = RoomBindings()
-
-        self.permission_resolver = PermissionResolver.from_dictionary(config.get('permissions'))
 
         self.punitive_model = PunitiveModel()
         self.master_client_service_factory = MasterClientServiceFactory(self.punitive_model)
@@ -60,7 +54,7 @@ class SpydServer(object):
         self.connect_auth_domain = config.get('connect_auth_domain', '')
 
         client_number_handle_provider = get_client_number_handle_provider(config)
-        self.client_factory = ClientFactory(client_number_handle_provider, self.room_bindings, self.auth_world_view_factory, self.permission_resolver, self.connect_auth_domain, self.punitive_model)
+        self.client_factory = ClientFactory(client_number_handle_provider, self.room_bindings, self.auth_world_view_factory, self.connect_auth_domain, self.punitive_model)
 
         self.client_protocol_factory = ClientProtocolFactory(self.client_factory, self.message_processor, config.get('client_message_rate_limit', 200))
 

@@ -1,11 +1,10 @@
 from spyd.game.client.client import Client
 
 class ClientFactory(object):
-    def __init__(self, client_number_handle_provider, room_bindings, auth_world_view_factory, permission_resolver, servinfo_domain, punitive_model):
+    def __init__(self, client_number_handle_provider, room_bindings, auth_world_view_factory, servinfo_domain, punitive_model):
         self.client_number_handle_provider = client_number_handle_provider
         self.room_bindings = room_bindings
         self.auth_world_view_factory = auth_world_view_factory
-        self.permission_resolver = permission_resolver
         self.servinfo_domain = servinfo_domain
         self.punitive_model = punitive_model
 
@@ -16,4 +15,4 @@ class ClientFactory(object):
 
         auth_world_view = self.auth_world_view_factory.build_auth_world_view(binding_port)
 
-        return Client(client_protocol, clientnum_handle, room, auth_world_view, self.permission_resolver, self.servinfo_domain, self.punitive_model)
+        return Client(client_protocol, clientnum_handle, room, auth_world_view, self.servinfo_domain, self.punitive_model)

@@ -53,7 +53,6 @@
             }
         }
     },
-    "permissions": "file://permissions.json",
     "master_servers": "file://master_servers.json",
     "max_duplicate_peers": 10
 }

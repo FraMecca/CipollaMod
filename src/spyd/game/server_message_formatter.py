@@ -13,6 +13,21 @@ def room_title_wrapper(title):
 def action_wrapper(action):
     return color_wrappers.orange("#{}".format(action))
 
+def yellow(text):
+    return f"{colors['blue']}{text}{colors['white']}"
+
+def red(text):
+    return f"{colors['red']}{text}{colors['white']}"
+
+def green(text):
+    return f"{colors['green']}{text}{colors['white']}"
+
+def blue(text):
+    return f"{colors['blue']}{text}{colors['white']}"
+
+def grey(text):
+    return f"{colors['grey']}{text}{colors['white']}"
+
 smf.register_wrapper('name',        color_wrappers.green)
 smf.register_wrapper('cn',          clientnum_wrapper)
 smf.register_wrapper('pn',          clientnum_wrapper)

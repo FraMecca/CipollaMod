@@ -63,7 +63,6 @@ class ModeBase(object):
     
     
     def on_player_shoot(self, player, shot_id, gun, from_pos, to_pos, hits):
-        print('shoot')
         if self.room.is_paused: return
         if self.room.is_intermission: return
 

@@ -5,7 +5,7 @@ from spyd.utils.constrain import constrain_range
 from spyd.protocol import swh
 from spyd.game.room.exceptions import UnknownEvent
 
-class PlayerEventHandler(object):
+class GameEventHandler(object):
     def __init__(self):
         self.actions = {
             'take_flag': self.on_take_flag,
@@ -111,8 +111,6 @@ class PlayerEventHandler(object):
         with room.broadcastbuffer(1, True, [player.client], clients) as cds:
             swh.put_sayteam(cds, player.client, text)
 
-            room.event_subscription_fulfiller.publish('spyd.game.player.chat', {'player': player.uuid, 'room': room.name, 'text': text, 'scope': 'team'})
-
     def on_edit_delete_cubes(self, room, selection):
         pass
 
@@ -164,7 +162,6 @@ class PlayerEventHandler(object):
 
     def on_game_chat(self, room, player, text):
         if text[0] == "#":
-            room.command_executer.execute(room, player.client, text)
+            player.client.role.handle_text_event(text, room, player)
         else:
             swh.put_text(player.state.messages, text)
-            room.event_subscription_fulfiller.publish('spyd.game.player.chat', {'player': player.uuid, 'room': room.name, 'text': text, 'scope': 'room'})

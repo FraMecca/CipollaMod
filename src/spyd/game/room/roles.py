@@ -1,21 +1,20 @@
 import time
 
-from cube2common.constants import mastermodes
-from cube2common.constants import disconnect_types
+from cube2common.constants import mastermodes, disconnect_types, privileges
 from spyd.game.server_message_formatter import error
-from spyd.permissions.functionality import Functionality
 from spyd.punitive_effects.punitive_effect_info import TimedExpiryInfo, EffectInfo
 from spyd.game.client.exceptions import InsufficientPermissions
 from spyd.game.gamemode.gamemodes import get_mode_name_from_num
 from spyd.game.map.resolve_map_name import resolve_map_name
 from spyd.game.client.exceptions import InsufficientPermissions, StateError
-from spyd.game.server_message_formatter import info
+from spyd.game.server_message_formatter import info, smf
 from spyd.game.room.exceptions import UnknownEvent
 from spyd.game.client.exceptions import *
 
-
-class ClientEventHandler(object):
+class BaseRole(object):
     def __init__(self):
+        self.privilege = privileges.PRIV_NONE
+
         self.actions = {
             'set_master': self.on_set_master,
             'check_maps': self.on_check_maps,
@@ -23,7 +22,7 @@ class ClientEventHandler(object):
             'item_list': self.on_item_list,
             'flag_list': self.on_flag_list,
             'edit_remip': self.on_edit_remip,
-            'give_master': self.on_give_master,
+            'give_master': self.on_not_allowed,
             'delete_bot': self.on_delete_bot,
             'edit_new_map': self.on_edit_new_map,
             'set_master_mode': self.on_set_master_mode,
@@ -36,10 +35,10 @@ class ClientEventHandler(object):
             'stop_demo_recording': self.on_stop_demo_recording,
             'pause_game': self.on_pause_game,
             'map_crc': self.on_map_crc,
-            'kick': self.on_kick,
+            'kick': self.on_not_allowed,
             'map_vote': self.on_map_vote,
             'set_demo_recording': self.on_set_demo_recording,
-            'auth_pass': self.on_auth_pass,
+            'auth_pass': self.on_auth,
             'clear_bans': self.on_clear_bans,
             'command': self.on_command,
             'set_bot_balance': self.on_set_bot_balance,
@@ -48,10 +47,40 @@ class ClientEventHandler(object):
             'edit_get_map': self.on_edit_get_map,
         }
 
+        self.text_actions = {
+            'kick': self.on_not_allowed,
+            'ban': self.on_not_allowed,
+            'givemaster': self.on_not_allowed,
+            'giveadmin': self.on_not_allowed,
+            'relinquishmaster': self.on_not_allowed,
+            'dropprivileges': self.on_not_allowed,
+            'spectate': self.on_not_allowed,
+            'changemap': self.on_not_allowed,
+            'duel': self.on_not_allowed,
+            # 'pm': self.on_pm, TODO implement this
+            'auth': self.on_auth,
+            'commands': self.on_commands,
+            'info': self.on_info,
+            'stats': self.on_stats,
+        }
+
 
     def handle_event(self, event_name, room, *args, **kwargs):
         action = self.actions.get(event_name, self.on_unknown_event)
         return action(room, *args, **kwargs)
+
+    # from game_event_handler
+    def handle_text_event(self, text, room, player):
+        def parse(text):
+            text = text[1:].split(' ')
+            return text[0], text[1:]
+
+        cmd, args = parse(text)
+
+        if not cmd in self.text_actions:
+            client.server.message('Command has not exist. Type #commands for more info')
+
+        return self.text_actions[cmd](room, player, args)
 
     def on_unknown_event(self, ev_name, *args, **kwargs):
         print("===ERROR UnknownEvent:", *args, **kwargs)
@@ -79,8 +108,8 @@ class ClientEventHandler(object):
     def on_edit_remip(self, room, client):
         pass
 
-    def on_give_master(self, room, client, client_target):
-        room._client_change_privilege(client, client_target, 1)
+    # def on_give_master(self, room, client, client_target):
+    #     room._client_change_privilege(client, client_target, 1)
 
     def on_delete_bot(self, room, client):
         pass
@@ -101,9 +130,6 @@ class ClientEventHandler(object):
         room.set_mastermode(mastermode)
 
     def on_set_team(self, room, client, target_pn, team_name):
-        if not client.allowed(set_others_teams_functionality):
-            raise InsufficientPermissions(set_others_teams_functionality.denied_message)
-
         player = room.get_player(target_pn)
         if player is None:
             raise UnknownPlayer(cn=target_pn)
@@ -120,16 +146,6 @@ class ClientEventHandler(object):
         player = room.get_player(target_pn)
         if player is None:
             raise UnknownPlayer(cn=target_pn)
-
-        if client.get_player() is player:
-            if not client.allowed(set_spectator_functionality):
-                raise InsufficientPermissions(set_spectator_functionality.denied_message)
-            if not spectate and not client.allowed(set_room_not_spectator_locked_functionality):
-                raise InsufficientPermissions(set_room_not_spectator_locked_functionality.denied_message)
-        else:
-            if not client.allowed(set_other_spectator_functionality):
-                raise InsufficientPermissions(set_other_spectator_functionality.denied_message)
-
         room._set_player_spectator(player, spectate)
 
     def on_clear_demo(self, room, client, demo_id):
@@ -142,9 +158,6 @@ class ClientEventHandler(object):
         pass
 
     def on_pause_game(self, room, client, pause):
-        if not client.allowed(pause_resume_functionality):
-            raise InsufficientPermissions(pause_resume_functionality.denied_message)
-
         if pause:
             if room.is_paused and not room.is_resuming: raise StateError('The game is already paused.')
             room.pause()
@@ -158,16 +171,16 @@ class ClientEventHandler(object):
         # TODO: Implement optional spectating of clients without valid map CRC's
         room.ready_up_controller.on_crc(client, crc)
 
-    def on_kick(self, room, client, target_pn, reason):
-        # TODO: Permissions checks
+    # def on_kick(self, room, client, target_pn, reason):
+    #     # TODO: Permissions checks
 
-        target_client = room.get_client(target_pn)
+    #     target_client = room.get_client(target_pn)
 
-        expiry_time = time.time() + (4 * SECONDS_PER_HOUR)
+    #     expiry_time = time.time() + (4 * SECONDS_PER_HOUR)
 
-        client._punitive_model.add_effect('ban', target_client.host, EffectInfo(TimedExpiryInfo(expiry_time)))
+    #     client._punitive_model.add_effect('ban', target_client.host, EffectInfo(TimedExpiryInfo(expiry_time)))
 
-        target_client.disconnect(disconnect_types.DISC_KICK, error("You were kicked by {name#kicker}", kicker=target_client))
+    #     target_client.disconnect(disconnect_types.DISC_KICK, error("You were kicked by {name#kicker}", kicker=target_client))
 
     def on_map_vote(self, room, client, map_name, mode_num):
         mode_name = get_mode_name_from_num(mode_num)
@@ -177,14 +190,15 @@ class ClientEventHandler(object):
     def on_set_demo_recording(self, room, client, value):
         pass
 
-    def on_auth_pass(self, room, client, message):
-        passw = message[0]
-        admin_pass = config_loader('config.json')['room_bindings'][room._name.value]['adminpass']
+    def on_auth(self, room, client, message):
+        # passw = message[0]
+        # admin_pass = config_loader('config.json')['room_bindings'][room._name.value]['adminpass']
 
-        if passw == admin_pass:
-            room._client_change_privilege(client, client, 3)
-        else:
-            raise WrongCredentials("Eheh, try again :)")
+        # if passw == admin_pass:
+        #     room._client_change_privilege(client, client, 3)
+        # else:
+        #     raise WrongCredentials("Eheh, try again :)")
+        pass
 
     def on_clear_bans(self, room, client):
         # TODO: Permissions checks
@@ -204,3 +218,64 @@ class ClientEventHandler(object):
 
     def on_edit_get_map(self, room, client):
         pass
+
+    def on_not_allowed(self, room, player, command, *args, **kwargs):
+        message = 'You don\'t have the permission to execute command: ' + command
+        player.client.send_server_message(message)
+
+    def on_commands(self, room, player, *args, **kwargs):
+        available_commands = self.text_actions.keys()
+        formatted_command_list = list(map(lambda s: '#'+s, available_commands))
+        player.client.send_server_message("\f7Commands: " + " | ".join(formatted_command_list))
+
+    def on_info(self, *args, **kwargs):
+        #TODO get info server
+        # client.send_server_message(info(spyd_server.server_info_model.value))
+        pass
+
+    def on_stats(self, *args, **kwargs):
+        #TODO statsss
+        pass
+
+
+class MasterRole(BaseRole):
+    def __init__(self):
+        super().__init__()
+        self.privilege = privileges.PRIV_MASTER
+
+        master_actions = {
+            'kick': self.on_kick,
+        #TODO finish
+        #     'ban': self.on_ban,
+        #     'givemaster': self.on_givemaster,
+        #     'spectate': self.on_spectate,
+        #     'changemap': self.on_changemap,
+        #     'duel': self.on_duel,
+        #     'dropprivileges': self.on_drop_privileges,
+        }
+
+        self.text_actions.update(master_actions)
+
+    def get_target_client(self, room, player, target_pn):
+        if not target_pn.is_digit():
+            player.client.send_server_message('Invalid player number')
+        else:
+            target_client = room.get_client(int(target_pn))
+            if target_client is None:
+                player.client.send_server_message('Player doesn\'t exist')
+            else:
+                return target_client
+
+        return None
+
+
+    def on_kick(self, room, player, args):
+        target_client = get_target_client(room, player, args[0])
+
+        if target_client:
+            expiry_time = time.time() + (4 * SECONDS_PER_HOUR)
+            client._punitive_model.add_effect('ban', target_client.host, EffectInfo(TimedExpiryInfo(expiry_time)))
+            target_client.disconnect(disconnect_types.DISC_KICK, error("You were kicked by {name#kicker}", kicker=target_client))
+
+class AdminRole(MasterRole):
+    pass

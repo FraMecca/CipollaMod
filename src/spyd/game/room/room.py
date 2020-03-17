@@ -7,16 +7,14 @@ from cube2common.constants import MAXROOMLEN, MAXSERVERDESCLEN, MAXSERVERLEN, ma
 from cube2demo.no_op_demo_recorder import NoOpDemoRecorder
 from spyd.game.client.exceptions import InsufficientPermissions, GenericError
 from spyd.game.room.client_collection import ClientCollection
-from spyd.game.room.client_event_handler import ClientEventHandler
 from spyd.game.room.player_collection import PlayerCollection
-from spyd.game.room.player_event_handler import PlayerEventHandler
+from spyd.game.room.game_event_handler import GameEventHandler
 from spyd.game.room.room_broadcaster import RoomBroadcaster
 from spyd.game.room.room_demo_recorder import RoomDemoRecorder
 from spyd.game.room.room_entry_context import RoomEntryContext
 from spyd.game.room.room_map_mode_state import RoomMapModeState
 from spyd.game.server_message_formatter import smf
 from spyd.game.timing.game_clock import GameClock
-from spyd.permissions.functionality import Functionality
 from spyd.protocol import swh
 from spyd.utils.truncate import truncate
 from spyd.utils.value_model import ValueModel
@@ -69,15 +67,17 @@ class Room(object):
         self.auths = set()
         self.admins = set()
 
-        self._client_event_handler = ClientEventHandler()
-        self._player_event_handler = PlayerEventHandler()
+        self._player_event_handler = GameEventHandler()
 
         self.ready_up_controller = None
 
         self._map_mode_state = RoomMapModeState(self, map_rotation, map_meta_data_accessor, self._game_clock, ready_up_controller_factory)
 
         self._broadcaster = RoomBroadcaster(self._clients, self._players, self.demo_recorder)
+
+
         reactor.addSystemEventTrigger('before', 'flush_bindings', self._flush_messages)
+
 
     ###########################################################################
     #######################        Accessors        ###########################
@@ -303,7 +303,7 @@ class Room(object):
     ###########################################################################
 
     def handle_client_event(self, event_name, client, *args, **kwargs):
-        handler = self._client_event_handler.handle_event
+        handler = client.role.handle_event
         deferred = defer.maybeDeferred(handler, event_name, self, client, *args, **kwargs)
         deferred.addErrback(client.handle_exception)
 
@@ -432,34 +432,26 @@ class Room(object):
         else:
             print("invalid change")
 
-    set_self_privilege_functionality_tree = {
-        'temporary': {
-            'claim': {
-                privileges.PRIV_MASTER: Functionality("spyd.game.room.temporary.claim_master", "You do not have permission to claim master."),
-                privileges.PRIV_AUTH: Functionality("spyd.game.room.temporary.claim_auth", "You do not have permission to claim auth."),
-                privileges.PRIV_ADMIN: Functionality("spyd.game.room.temporary.claim_admin", "You do not have permission to claim admin.")
-            },
-            'relinquish': {
-                privileges.PRIV_MASTER: Functionality("spyd.game.room.temporary.relinquish_master", "Cannot relinquish master."),
-                privileges.PRIV_AUTH: Functionality("spyd.game.room.temporary.relinquish_auth", "Cannot relinquish auth."),
-                privileges.PRIV_ADMIN: Functionality("spyd.game.room.temporary.relinquish_admin", "Cannot relinquish master.")
-            }
-        },
-        'permanent': {
-            'claim': {
-                privileges.PRIV_MASTER: Functionality("spyd.game.room.permanent.claim_master", "You do not have permission to claim master in permanent rooms."),
-                privileges.PRIV_AUTH: Functionality("spyd.game.room.permanent.claim_auth", "You do not have permission to claim auth in permanent rooms."),
-                privileges.PRIV_ADMIN: Functionality("spyd.game.room.permanent.claim_admin", "You do not have permission to claim admin in permanent rooms.")
-            },
-            'relinquish': {
-                privileges.PRIV_MASTER: Functionality("spyd.game.room.permanent.relinquish_master", "Cannot relinquish master."),
-                privileges.PRIV_AUTH: Functionality("spyd.game.room.permanent.relinquish_auth", "Cannot relinquish auth."),
-                privileges.PRIV_ADMIN: Functionality("spyd.game.room.permanent.relinquish_admin", "Cannot relinquish master.")
-            }
-        }
-    }
+    def _set_others_privilege(self, client, target, requested_privilege):
+        raise GenericError("Setting other player privileges isn't currently implemented.")
+
+    def _client_try_set_privilege(self, client, target, requested_privilege, pass_hash):
+        if client is target:
+            return self._set_self_privilege(client, requested_privilege, pass_hash)
+        else:
+            return self._set_others_privilege(client, target, requested_privilege)
+
+    def _update_current_masters(self):
+        self._broadcaster.current_masters(self.mastermode, self.clients)
+
+    def _finalize_demo_recording(self):
+        self.demo_recorder.write("/tmp/abaracada.dmo")
+
+    def _initialize_demo_recording(self):
+        self.demo_recorder.initialize_demo_recording()
 
 
+    #TODO remove and reimplement
     def _client_change_privilege(self, client, target, requested_privilege):
         if requested_privilege == privileges.PRIV_NONE:
             self.admins.discard(target)
@@ -494,21 +486,3 @@ class Room(object):
             self._client_change_privilege(client, client, requested_privilege)
         else:
             raise InsufficientPermissions(functionality.denied_message)
-
-    def _set_others_privilege(self, client, target, requested_privilege):
-        raise GenericError("Setting other player privileges isn't currently implemented.")
-
-    def _client_try_set_privilege(self, client, target, requested_privilege, pass_hash):
-        if client is target:
-            return self._set_self_privilege(client, requested_privilege, pass_hash)
-        else:
-            return self._set_others_privilege(client, target, requested_privilege)
-
-    def _update_current_masters(self):
-        self._broadcaster.current_masters(self.mastermode, self.clients)
-
-    def _finalize_demo_recording(self):
-        self.demo_recorder.write("/tmp/abaracada.dmo")
-
-    def _initialize_demo_recording(self):
-        self.demo_recorder.initialize_demo_recording()

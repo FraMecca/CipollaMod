@@ -9,23 +9,19 @@ from twisted.python.failure import Failure
 from cube2common.constants import disconnect_types, MAXNAMELEN
 from cube2protocol.cube_data_stream import CubeDataStream
 from spyd.game.client.client_auth_state import ClientAuthState
-from spyd.game.client.client_permissions import ClientPermissions
 from spyd.game.client.client_player_collection import ClientPlayerCollection
+from spyd.game.client.client_message_handler import ClientMessageHandler
 from spyd.game.client.exceptions import *
 from spyd.game.room.exceptions import *
-from spyd.game.client.client_message_handler import ClientMessageHandler
-from spyd.game.client.room_group_provider import RoomGroupProvider
 from spyd.game.player.player import Player
 from spyd.game.room.exceptions import RoomEntryFailure
+from spyd.game.room.roles import BaseRole, MasterRole, AdminRole
 from spyd.game.server_message_formatter import error, smf, denied, state_error, usage_error
-from spyd.permissions.functionality import Functionality
 from spyd.protocol import swh
 from spyd.utils.constrain import ConstraintViolation
 from spyd.utils.filtertext import filtertext
 from spyd.utils.ping_buffer import PingBuffer
 
-
-bypass_ban = Functionality("spyd.game.client.bypass_ban")
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +29,11 @@ class Client(object):
     '''
     Handles the per client networking, and distributes the messages out to the players (main, bots).
     '''
-    def __init__(self, protocol, clientnum_handle, room, auth_world_view, permission_resolver, servinfo_domain, punitive_model):
-
+    def __init__(self, protocol, clientnum_handle, room, auth_world_view, servinfo_domain, punitive_model):
         self.cn_handle = clientnum_handle
         self.cn = clientnum_handle.cn
         self.room = room
+        self.role = BaseRole()
         self.connection_sequence_complete = False
 
         self._client_player_collection = ClientPlayerCollection(self.cn)
@@ -56,17 +52,15 @@ class Client(object):
 
         self._client_auth_state = ClientAuthState(self, auth_world_view)
 
-        self._client_permissions = ClientPermissions(permission_resolver)
-
-        self.add_group_name_provider(RoomGroupProvider(self))
-
         self._servinfo_domain = servinfo_domain
 
         self._punitive_model = punitive_model
 
+
         self.command_context = {}
 
         self.message_handler = ClientMessageHandler()
+
 
     def __format__(self, format_spec):
         player = self.get_player()
@@ -136,6 +130,9 @@ class Client(object):
     def send_server_message(self, message):
         with self.sendbuffer(1, True) as cds:
             swh.put_servmsg(cds, message)
+
+    def change_role(self, new_role):
+        self.role = new_role
 
     @property
     def is_connected(self):
@@ -232,10 +229,4 @@ class Client(object):
 
     @property
     def privilege(self):
-        return self._client_permissions.privilege
-
-    def add_group_name_provider(self, group_name_provider):
-        self._client_permissions.add_group_name_provider(group_name_provider)
-
-    def allowed(self, functionality):
-        return self._client_permissions.allowed(functionality)
+        return self.role.privilege
