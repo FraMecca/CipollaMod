@@ -242,3 +242,6 @@ class ModeBase(object):
         player.state.armourtype = self.spawnarmourtype
         player.state.gunselect = self.spawngunselect
         player.state.ammo = self.spawnammo
+
+    def on_client_flag_list(self, player, flag_list):
+        pass

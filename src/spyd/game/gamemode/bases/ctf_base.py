@@ -168,6 +168,9 @@ class CtfBase(TeamplayBase):
             swh.put_died(cds, player, player)
         self.on_player_death(player, player)
 
+    def on_client_flag_list(self, player, flag_list):
+        return self.on_player_flag_list(player, flag_list)
+    
     def on_player_flag_list(self, player, flag_list):
         super().on_player_flag_list(player, flag_list)
         if not self.got_flags:

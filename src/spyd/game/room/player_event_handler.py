@@ -48,7 +48,6 @@ class PlayerEventHandler(object):
         print("===ERROR UnknownEvent:", *args, **kwargs)
         raise UnknownEvent('Event: '+ev_name+' Arguments: '+str(args) + str(kwargs))
 
-
     def on_take_flag(self, room, player, flag, version):
         room.gamemode.on_player_take_flag(player, flag, version)
 
