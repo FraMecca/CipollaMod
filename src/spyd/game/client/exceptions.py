@@ -9,6 +9,7 @@ class GenericError(Exception):
 class StateError(GenericError): pass
 class UsageError(GenericError): pass
 class InsufficientPermissions(GenericError): pass
+class UnknownMessage(GenericError): pass
 class UnknownPlayer(GenericError):
     def __init__(self, cn=None, name=None):
         if cn is not None:

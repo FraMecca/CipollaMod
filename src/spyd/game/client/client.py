@@ -11,8 +11,8 @@ from cube2protocol.cube_data_stream import CubeDataStream
 from spyd.game.client.client_auth_state import ClientAuthState
 from spyd.game.client.client_permissions import ClientPermissions
 from spyd.game.client.client_player_collection import ClientPlayerCollection
-from spyd.game.client.exceptions import InsufficientPermissions, StateError, UsageError, GenericError
-from spyd.game.client.message_handlers import get_message_handlers
+from spyd.game.client.exceptions import InsufficientPermissions, StateError, UsageError, GenericError, UnknownMessage
+from spyd.game.client.client_message_handler import ClientMessageHandler
 from spyd.game.client.room_group_provider import RoomGroupProvider
 from spyd.game.player.player import Player
 from spyd.game.room.exceptions import RoomEntryFailure
@@ -53,8 +53,6 @@ class Client(object):
         self._allowed_preconnect_message_types = ("N_CONNECT", "N_AUTHANS")
         self._ignore_client_messages = False
 
-        self._message_handlers = get_message_handlers()
-
         self._client_auth_state = ClientAuthState(self, auth_world_view)
 
         self._client_permissions = ClientPermissions(permission_resolver)
@@ -66,6 +64,8 @@ class Client(object):
         self._punitive_model = punitive_model
 
         self.command_context = {}
+
+        self.message_handler = ClientMessageHandler()
 
     def __format__(self, format_spec):
         player = self.get_player()
@@ -205,7 +205,6 @@ class Client(object):
             self.disconnect(disconnect_types.DISC_MSGERR)
 
     def _message_received(self, message_type, message):
-        print(message)
         if self._ignore_client_messages: return
         try:
             if (not self.is_connected) and (message_type in self._ignored_preconnect_message_types):
@@ -214,14 +213,13 @@ class Client(object):
                 self.disconnect(disconnect_types.DISC_MSGERR)
                 return
             else:
-                if message_type in self._message_handlers:
-                    handler = self._message_handlers[message_type]
-                    try:
-                        handler.handle(self, self.room, message)
-                    except (InsufficientPermissions, StateError, UsageError, GenericError, ConstraintViolation) as e:
-                        self.handle_exception(e)
-                else:
+                try:
+                    self.message_handler.handle_message(self, self.room, message_type, message)
+                except UnknownMessage as e:
                     print("Client received unhandled message type:", message_type, message)
+                    pass
+                except (InsufficientPermissions, StateError, UsageError, GenericError, ConstraintViolation) as e:
+                    self.handle_exception(e)
         except ConstraintViolation as e:
             pass  # Plenty of information already printed.
         except:
