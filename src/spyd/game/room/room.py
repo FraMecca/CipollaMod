@@ -32,7 +32,7 @@ class Room(object):
     * Accessors to query the state of the room.
     * Setters to modify the state of the room.
     '''
-    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, command_executer=None, event_subscription_fulfiller=None, maxplayers=None, show_awards=True, demo_recorder=None):
+    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, command_executer=None, maxplayers=None, show_awards=True, demo_recorder=None):
         self._game_clock = GameClock()
         self._attach_game_clock_event_handlers()
 
@@ -51,8 +51,6 @@ class Room(object):
 
         self.command_executer = command_executer
         self.command_context = {}
-
-        self.event_subscription_fulfiller = event_subscription_fulfiller
 
         self.maxplayers = maxplayers
 

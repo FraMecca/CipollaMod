@@ -32,7 +32,7 @@ class Client(object):
     '''
     Handles the per client networking, and distributes the messages out to the players (main, bots).
     '''
-    def __init__(self, protocol, clientnum_handle, room, auth_world_view, permission_resolver, event_subscription_fulfiller, servinfo_domain, punitive_model):
+    def __init__(self, protocol, clientnum_handle, room, auth_world_view, permission_resolver, servinfo_domain, punitive_model):
 
         self.cn_handle = clientnum_handle
         self.cn = clientnum_handle.cn
@@ -61,8 +61,6 @@ class Client(object):
 
         self.add_group_name_provider(RoomGroupProvider(self))
 
-        self.event_subscription_fulfiller = event_subscription_fulfiller
-
         self._servinfo_domain = servinfo_domain
 
         self._punitive_model = punitive_model
@@ -90,7 +88,6 @@ class Client(object):
         print("disconnect:", self.host)
         if self.is_connected:
             self.room.client_leave(self)
-            self.event_subscription_fulfiller.publish('spyd.game.player.disconnect', {'player': self.uuid, 'room': self.room.name})
 
         self.cn_handle.release()
         self._client_player_collection.cleanup_players()
@@ -134,8 +131,6 @@ class Client(object):
         self.room.client_enter(room_entry_context)
 
         self.connection_sequence_complete = True
-
-        self.event_subscription_fulfiller.publish('spyd.game.player.connect', {'player': self.uuid, 'room': self.room.name})
 
     def send_server_message(self, message):
         with self.sendbuffer(1, True) as cds:

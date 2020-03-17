@@ -3,8 +3,6 @@ import os
 
 from twisted.application import service
 from twisted.internet import reactor, defer
-import txCascil
-from txCascil.events import EventSubscriptionFulfiller
 
 from cube2common.constants import disconnect_types
 from cube2protocol.sauerbraten.collect.server_read_message_processor import ServerReadMessageProcessor
@@ -24,7 +22,6 @@ from spyd.punitive_effects.punitive_model import PunitiveModel
 from spyd.registry_manager import RegistryManager
 from spyd.server.binding.binding_service import BindingService
 from spyd.server.binding.client_protocol_factory import ClientProtocolFactory
-import spyd.server.gep_message_handlers  # @UnusedImport
 from spyd.utils.value_model import ValueModel
 
 
@@ -45,12 +42,11 @@ class SpydServer(object):
         map_meta_data_accessor = AsyncMapMetaDataAccessor(sauerbraten_package_dir)
         print("Using package directory; {!r}".format(sauerbraten_package_dir))
 
-        self.event_subscription_fulfiller = EventSubscriptionFulfiller()
 
         command_executer = CommandExecuter(self)
 
         self.room_manager = RoomManager()
-        self.room_factory = RoomFactory(config, self.room_manager, self.server_name_model, map_meta_data_accessor, command_executer, self.event_subscription_fulfiller)
+        self.room_factory = RoomFactory(config, self.room_manager, self.server_name_model, map_meta_data_accessor, command_executer)
         self.room_bindings = RoomBindings()
 
         self.permission_resolver = PermissionResolver.from_dictionary(config.get('permissions'))
@@ -64,7 +60,7 @@ class SpydServer(object):
         self.connect_auth_domain = config.get('connect_auth_domain', '')
 
         client_number_handle_provider = get_client_number_handle_provider(config)
-        self.client_factory = ClientFactory(client_number_handle_provider, self.room_bindings, self.auth_world_view_factory, self.permission_resolver, self.event_subscription_fulfiller, self.connect_auth_domain, self.punitive_model)
+        self.client_factory = ClientFactory(client_number_handle_provider, self.room_bindings, self.auth_world_view_factory, self.permission_resolver, self.connect_auth_domain, self.punitive_model)
 
         self.client_protocol_factory = ClientProtocolFactory(self.client_factory, self.message_processor, config.get('client_message_rate_limit', 200))
 
@@ -76,7 +72,6 @@ class SpydServer(object):
 
         self._initialize_master_clients(config)
         self._initialize_rooms(config)
-        self._initialize_gep_endpoints(config)
 
         reactor.addSystemEventTrigger("before", "shutdown", self._before_shutdown, config)
 
@@ -107,19 +102,6 @@ class SpydServer(object):
             master_client_service = self.master_client_service_factory.build_master_client_service(master_server_config)
             self.auth_world_view_factory.register_auth_service(master_client_service, register_port)
             master_client_service.setServiceParent(self.root_service)
-
-    def _initialize_gep_endpoints(self, config):
-        message_handlers = {}
-        for message_handler_registration in RegistryManager.get_registrations('gep_message_handler'):
-            message_handler = message_handler_registration.registered_object
-            if message_handler.msgtype in message_handlers:
-                raise Exception("Duplicate message handler registered.")
-            message_handlers[message_handler.msgtype] = message_handler
-
-        gep_service_factory = txCascil.ServerServiceFactory()
-        for gep_config in config['gep_endpoints'].values():
-            gep_service = gep_service_factory.build_service(self, gep_config, message_handlers, self.permission_resolver, self.event_subscription_fulfiller)
-            gep_service.setServiceParent(self.root_service)
 
     def _before_shutdown(self, config):
         shutdown_countdown = config.get('shutdown_countdown', 3)

@@ -11,7 +11,7 @@ class RoomFactory(object):
     If a room type is specified the room will be initialized according to that registered room type if it exists.
     Otherwise it will be initialized with the default settings.
     """
-    def __init__(self, config, room_manager, server_name_model, map_meta_data_accessor, command_executer, event_subscription_fulfiller):
+    def __init__(self, config, room_manager, server_name_model, map_meta_data_accessor, command_executer):
         self.config = config
         self.room_manager = room_manager
         self.room_manager.set_factory(self)
@@ -21,7 +21,6 @@ class RoomFactory(object):
         self.server_name_model = server_name_model
         self.map_meta_data_accessor = map_meta_data_accessor
         self.command_executer = command_executer
-        self.event_subscription_fulfiller = event_subscription_fulfiller
 
     def get_room_config(self, name, room_type='default'):
         room_config = {}
@@ -49,7 +48,6 @@ class RoomFactory(object):
                     map_meta_data_accessor=self.map_meta_data_accessor,
                     map_rotation=map_rotation,
                     command_executer=self.command_executer,
-                    event_subscription_fulfiller=self.event_subscription_fulfiller,
                     maxplayers=maxplayers,
                     demo_recorder=demo_recorder)
 
