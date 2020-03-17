@@ -2,10 +2,7 @@ from cube2common.constants import armor_types
 from spyd.game.gamemode.bases.mode_base import make_multidispatch, extract_public_methods
 from spyd.game.gamemode.bases.tactics_base import TacticsBase
 from spyd.game.gamemode.bases.teamplay_base import TeamplayBase
-from spyd.registry_manager import register
 
-
-# @register('gamemode')
 class TacticsTeam(TacticsBase, TeamplayBase):
     isbasemode = True
     clientmodename = 'tacteam'

@@ -2,7 +2,7 @@ from twisted.internet import defer
 
 from cube2common.constants import INTERMISSIONLEN
 from spyd.game.client.exceptions import GenericError
-from spyd.game.gamemode import gamemodes
+from spyd.game.gamemode.gamemodes import gamemodes
 from spyd.game.map.map_rotation import MapRotation
 from spyd.protocol import swh
 

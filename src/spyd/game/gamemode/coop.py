@@ -1,9 +1,6 @@
 from cube2common.constants import armor_types, weapon_types
 from spyd.game.gamemode.bases.item_base import ItemBase
-from spyd.registry_manager import register
 
-
-# @register('gamemode')
 class Coop(ItemBase):
     isbasemode = True
     clientmodename = 'coop'

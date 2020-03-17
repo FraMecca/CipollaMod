@@ -1,10 +1,7 @@
 from cube2common.constants import armor_types, weapon_types
 from spyd.game.gamemode.bases.item_base import ItemBase
 from spyd.game.gamemode.bases.teamplay_base import TeamplayBase
-from spyd.registry_manager import register
 
-
-# @register('gamemode')
 class Teamplay(ItemBase, TeamplayBase):
     isbasemode = True
     clientmodename = 'teamplay'

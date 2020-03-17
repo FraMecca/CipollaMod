@@ -6,7 +6,7 @@ from spyd.game.server_message_formatter import error
 from spyd.permissions.functionality import Functionality
 from spyd.punitive_effects.punitive_effect_info import TimedExpiryInfo, EffectInfo
 from spyd.game.client.exceptions import InsufficientPermissions
-from spyd.game.gamemode import get_mode_name_from_num
+from spyd.game.gamemode.gamemodes import get_mode_name_from_num
 from spyd.game.map.resolve_map_name import resolve_map_name
 from spyd.game.client.exceptions import InsufficientPermissions, StateError
 from spyd.game.server_message_formatter import info
@@ -209,6 +209,3 @@ class ClientEventHandler(object):
 
     def on_edit_get_map(self, room, client):
         pass
-
-from spyd.utils.tracing import trace_class
-trace_class(ClientEventHandler)

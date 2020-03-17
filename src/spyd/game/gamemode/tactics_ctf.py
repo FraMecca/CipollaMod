@@ -2,9 +2,7 @@ from cube2common.constants import armor_types
 from spyd.game.gamemode.bases.ctf_base import CtfBase
 from spyd.game.gamemode.bases.tactics_base import TacticsBase
 from spyd.game.gamemode.bases.mode_base import make_multidispatch, extract_public_methods
-from spyd.registry_manager import register
 
-# @register('gamemode')
 class TacticsCtf(object):
     isbasemode = False
     clientmodename = 'tacctf'

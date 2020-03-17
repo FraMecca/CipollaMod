@@ -1,9 +1,6 @@
 from cube2common.constants import armor_types, weapon_types
 from spyd.game.gamemode.bases.ctf_base import CtfBase
-from spyd.registry_manager import register
 
-
-@register('gamemode')
 class InstaCtf(CtfBase):
     isbasemode = True
     clientmodename = 'instactf'

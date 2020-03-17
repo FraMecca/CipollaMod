@@ -1,9 +1,6 @@
 from cube2common.constants import armor_types
 from spyd.game.gamemode.bases.tactics_base import TacticsBase
-from spyd.registry_manager import register
 
-
-# @register('gamemode')
 class Tactics(TacticsBase):
     isbasemode = True
     clientmodename = 'tactics'

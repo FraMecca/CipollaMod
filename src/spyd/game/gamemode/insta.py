@@ -1,9 +1,6 @@
 from cube2common.constants import weapon_types, armor_types
 from spyd.game.gamemode.bases.mode_base import ModeBase
-from spyd.registry_manager import register
 
-
-@register('gamemode')
 class Insta(ModeBase):
     isbasemode = True
     clientmodename = 'insta'

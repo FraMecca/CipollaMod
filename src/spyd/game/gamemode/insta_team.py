@@ -1,9 +1,6 @@
 from cube2common.constants import armor_types, weapon_types
 from spyd.game.gamemode.bases.teamplay_base import TeamplayBase
-from spyd.registry_manager import register
 
-
-@register('gamemode')
 class InstaTeam(TeamplayBase):
     isbasemode = True
     clientmodename = 'instateam'
