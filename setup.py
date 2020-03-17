@@ -29,7 +29,6 @@ packages = [
         'spyd.server.binding',
         'spyd.server.gep_message_handlers',
         'spyd.server.lan_info',
-        'spyd.server.metrics',
         'spyd.utils',
 ]
 

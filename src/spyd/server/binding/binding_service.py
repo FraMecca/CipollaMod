@@ -4,18 +4,13 @@ from twisted.application import service
 from twisted.internet import reactor, task
 
 from spyd.server.binding.binding import Binding
-from spyd.server.metrics.rate_aggregator import RateAggregator
 
 
 class BindingService(service.Service):
-    def __init__(self, client_protocol_factory, metrics_service):
+    def __init__(self, client_protocol_factory):
         self.bindings = set()
 
         self.client_protocol_factory = client_protocol_factory
-
-        self.metrics_service = metrics_service
-
-        self.flush_rate_aggregator = RateAggregator(metrics_service, 'flush_all_rate', 1.0)
 
         reactor.addSystemEventTrigger('during', 'flush_bindings', self.flush_all)
         self.flush_looping_call = task.LoopingCall(reactor.fireSystemEvent, 'flush_bindings')
@@ -33,7 +28,7 @@ class BindingService(service.Service):
         service.Service.stopService(self)
 
     def add_binding(self, interface, port, maxclients, maxdown, maxup, max_duplicate_peers):
-        binding = Binding(reactor, self.metrics_service, interface, port, maxclients=maxclients, channels=2, maxdown=maxdown, maxup=maxup, max_duplicate_peers=max_duplicate_peers)
+        binding = Binding(reactor, interface, port, maxclients=maxclients, channels=2, maxdown=maxdown, maxup=maxup, max_duplicate_peers=max_duplicate_peers)
         self.bindings.add(binding)
 
     def flush_all(self):
@@ -41,6 +36,5 @@ class BindingService(service.Service):
         try:
             for binding in self.bindings:
                 binding.flush()
-            self.flush_rate_aggregator.tick()
         except:
             traceback.print_exc()

@@ -1,2 +1,0 @@
-from spyd.server.metrics.get_metrics_service import get_metrics_service
-from spyd.server.metrics.rate_aggregator import RateAggregator

@@ -60,6 +60,3 @@ class ItemBase(ModeBase):
             item = Item(self.room, self.room._game_clock, n, item_dict['item_type'])
             self.items.append(item)
             i += 1
-
-from spyd.utils.tracing import trace_class
-trace_class(ItemBase)

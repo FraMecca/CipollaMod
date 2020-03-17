@@ -33,6 +33,3 @@ class TacticsBase(ModeBase):
 
         player.state.gunselect = gun1
         player.state.ammo = ammo
-
-from spyd.utils.tracing import trace_class
-trace_class(TacticsBase)

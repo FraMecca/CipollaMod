@@ -10,10 +10,9 @@ import enet
 
 
 class ClientProtocol(ENetClientProtocol):
-    def __init__(self, client_factory, message_processor, message_rate_limit, message_processing_execution_timer):
+    def __init__(self, client_factory, message_processor, message_rate_limit):
         self._client_factory = client_factory
         self._message_processor = message_processor
-        self._message_processing_execution_timer = message_processing_execution_timer
 
         self._message_rate_limiter = RateLimiter(message_rate_limit)
 
@@ -31,8 +30,7 @@ class ClientProtocol(ENetClientProtocol):
 
     def dataReceived(self, channel, data):
         try:
-            with self._message_processing_execution_timer.measure():
-                processed_messages = self._message_processor.process(channel, data)
+            processed_messages = self._message_processor.process(channel, data)
         except:
             print("Error processing messages from {}:{}".format(self._client.host, self._client.port))
             traceback.print_exc()

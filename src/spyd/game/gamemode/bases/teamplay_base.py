@@ -74,6 +74,3 @@ class TeamplayBase(ModeBase):
         with self.room.broadcastbuffer(1, True) as cds:
             swh.put_died(cds, player, player)
         self.on_player_death(player, player)
-
-from spyd.utils.tracing import trace_class
-trace_class(TeamplayBase)

@@ -19,7 +19,6 @@ from spyd.game.server_message_formatter import smf
 from spyd.game.timing.game_clock import GameClock
 from spyd.permissions.functionality import Functionality
 from spyd.protocol import swh
-from spyd.server.metrics.execution_timer import ExecutionTimer
 from spyd.utils.truncate import truncate
 from spyd.utils.value_model import ValueModel
 
@@ -33,11 +32,9 @@ class Room(object):
     * Accessors to query the state of the room.
     * Setters to modify the state of the room.
     '''
-    def __init__(self, ready_up_controller_factory, metrics_service=None, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, command_executer=None, event_subscription_fulfiller=None, maxplayers=None, show_awards=True, demo_recorder=None):
+    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, command_executer=None, event_subscription_fulfiller=None, maxplayers=None, show_awards=True, demo_recorder=None):
         self._game_clock = GameClock()
         self._attach_game_clock_event_handlers()
-
-        self._metrics_service = metrics_service
 
         self.manager = room_manager
 
@@ -45,8 +42,6 @@ class Room(object):
         self._name = ValueModel(room_name or "1234567")
         self._server_name_model.observe(self._on_name_changed)
         self._name.observe(self._on_name_changed)
-
-        self._flush_positions_execution_timer = ExecutionTimer(self._metrics_service, 'room.{}.flush_positions'.format(self.name), 1.0)
 
         self._clients = ClientCollection()
         self._players = PlayerCollection()
@@ -378,8 +373,7 @@ class Room(object):
     def _flush_messages(self):
         if not self.decommissioned:
             reactor.callLater(0, reactor.addSystemEventTrigger, 'before', 'flush_bindings', self._flush_messages)
-        with self._flush_positions_execution_timer.measure():
-            self._broadcaster.flush_messages()
+        self._broadcaster.flush_messages()
 
     def _initialize_client_match_data(self, cds, client):
         player = client.get_player()

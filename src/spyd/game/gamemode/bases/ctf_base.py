@@ -200,6 +200,3 @@ class CtfBase(TeamplayBase):
                 reason = 1
             target.team = team
             swh.put_setteam(cds, target, reason)
-
-from spyd.utils.tracing import trace_class
-trace_class(CtfBase)

@@ -242,6 +242,3 @@ class ModeBase(object):
         player.state.armourtype = self.spawnarmourtype
         player.state.gunselect = self.spawngunselect
         player.state.ammo = self.spawnammo
-
-from spyd.utils.tracing import trace_class
-trace_class(ModeBase)
