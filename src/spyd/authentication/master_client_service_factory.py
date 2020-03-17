@@ -1,18 +1,13 @@
 import spyd.authentication.services  # @UnusedImport
 from spyd.config_loader import ConfigurationError
-from spyd.registry_manager import RegistryManager
 
 
 class MasterClientServiceFactory(object):
     def __init__(self, punitive_model):
+        from spyd.authentication.services.types import types as service_types
         self._punitive_model = punitive_model
 
-        self._service_types = {}
-
-        for service_type_registration in RegistryManager.get_registrations('master_client_service'):
-            service_type = service_type_registration.args[0]
-
-            self._service_types[service_type] = service_type_registration.registered_object
+        self._service_types = service_types
 
     def build_master_client_service(self, config):
         master_client_type = config.get('type', None)

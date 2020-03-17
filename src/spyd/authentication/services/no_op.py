@@ -4,10 +4,8 @@ from zope.interface import implementer
 
 from spyd.authentication.exceptions import AuthFailedException
 from spyd.authentication.interfaces import IAuthService
-from spyd.registry_manager import register
 
 
-@register("master_client_service", "no_op")
 class NoOpMasterClientService(service.Service):
     implementer(IAuthService)
     

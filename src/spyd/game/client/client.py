@@ -210,12 +210,12 @@ class Client(object):
             self.disconnect(disconnect_types.DISC_MSGERR)
 
     def _message_received(self, message_type, message):
+        print(message)
         if self._ignore_client_messages: return
         try:
             if (not self.is_connected) and (message_type in self._ignored_preconnect_message_types):
                 pass
             elif (not self.is_connected) and (message_type not in self._allowed_preconnect_message_types):
-                print(message_type)
                 self.disconnect(disconnect_types.DISC_MSGERR)
                 return
             else:
