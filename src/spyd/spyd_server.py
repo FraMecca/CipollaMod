@@ -17,7 +17,6 @@ from spyd.game.room.room_factory import RoomFactory
 from spyd.game.room.room_manager import RoomManager
 from spyd.game.server_message_formatter import notice
 from spyd.punitive_effects.punitive_model import PunitiveModel
-from spyd.registry_manager import RegistryManager
 from spyd.server.binding.binding_service import BindingService
 from spyd.server.binding.client_protocol_factory import ClientProtocolFactory
 from spyd.utils.value_model import ValueModel
