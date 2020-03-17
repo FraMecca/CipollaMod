@@ -11,7 +11,8 @@ from cube2protocol.cube_data_stream import CubeDataStream
 from spyd.game.client.client_auth_state import ClientAuthState
 from spyd.game.client.client_permissions import ClientPermissions
 from spyd.game.client.client_player_collection import ClientPlayerCollection
-from spyd.game.client.exceptions import InsufficientPermissions, StateError, UsageError, GenericError, UnknownMessage
+from spyd.game.client.exceptions import *
+from spyd.game.room.exceptions import *
 from spyd.game.client.client_message_handler import ClientMessageHandler
 from spyd.game.client.room_group_provider import RoomGroupProvider
 from spyd.game.player.player import Player
@@ -200,6 +201,8 @@ class Client(object):
             self.send_server_message(usage_error(e.message))
         elif isinstance(e, GenericError):
             self.send_server_message(error(e.message))
+        elif isinstance(e, UnknownEvent):
+            print(f"Unhandled player event: {str(e)}")
         elif isinstance(e, ConstraintViolation):
             print("Disconnecting client {} due to constraint violation {}.".format(self.host, e.constraint_name))
             self.disconnect(disconnect_types.DISC_MSGERR)

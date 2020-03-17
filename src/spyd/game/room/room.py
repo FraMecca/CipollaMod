@@ -10,7 +10,7 @@ from spyd.game.client.exceptions import InsufficientPermissions, GenericError
 from spyd.game.room.client_collection import ClientCollection
 from spyd.game.room.client_event_handlers import get_client_event_handlers
 from spyd.game.room.player_collection import PlayerCollection
-from spyd.game.room.player_event_handlers import get_player_event_handlers
+from spyd.game.room.player_event_handler import PlayerEventHandler
 from spyd.game.room.room_broadcaster import RoomBroadcaster
 from spyd.game.room.room_demo_recorder import RoomDemoRecorder
 from spyd.game.room.room_entry_context import RoomEntryContext
@@ -73,7 +73,7 @@ class Room(object):
         self.admins = set()
 
         self._client_event_handlers = get_client_event_handlers()
-        self._player_event_handlers = get_player_event_handlers()
+        self._player_event_handler = PlayerEventHandler()
 
         self.ready_up_controller = None
 
@@ -318,12 +318,8 @@ class Room(object):
     ###########################################################################
 
     def handle_player_event(self, event_name, player, *args, **kwargs):
-        if event_name in self._player_event_handlers:
-            event_handler = self._player_event_handlers[event_name]
-            deferred = defer.maybeDeferred(event_handler.handle, self, player, *args, **kwargs)
-            deferred.addErrback(player.client.handle_exception)
-        else:
-            print("Unhandled player event: {} with args: {}, {}".format(event_name, args, kwargs))
+       deferred = defer.maybeDeferred(self._player_event_handler.handle_event, event_name, self, player, *args, **kwargs)
+       deferred.addErrback(player.client.handle_exception)
 
     ###########################################################################
     #####################  Game clock event handling  #########################

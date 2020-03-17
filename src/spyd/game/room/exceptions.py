@@ -10,3 +10,5 @@ class RoomEntryPermissionDenied(RoomEntryFailure):
 
 class RoomEntryDeniedMaxClients(RoomEntryFailure):
     disconnect_type = disconnect_types.DISC_MAXCLIENTS
+
+class UnknownEvent(Exception): pass
