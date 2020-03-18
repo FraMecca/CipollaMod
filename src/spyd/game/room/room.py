@@ -3,6 +3,7 @@ import traceback
 
 from twisted.internet import reactor, defer
 
+from spyd.utils.tracing import tracer
 from cube2common.constants import MAXROOMLEN, MAXSERVERDESCLEN, MAXSERVERLEN, mastermodes, privileges
 from cube2demo.no_op_demo_recorder import NoOpDemoRecorder
 from spyd.game.client.exceptions import InsufficientPermissions, GenericError
@@ -29,7 +30,7 @@ class Room(object):
     * Accessors to query the state of the room.
     * Setters to modify the state of the room.
     '''
-    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, command_executer=None, maxplayers=None, demo_recorder=None):
+    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, maxplayers=None, demo_recorder=None):
         self._game_clock = GameClock()
         self._attach_game_clock_event_handlers()
 
@@ -42,12 +43,10 @@ class Room(object):
 
         self._clients = ClientCollection()
         self._players = PlayerCollection()
+        self._mods = {} # TODO: activate mods at room initialization
 
         # '123.321.123.111': {client, client, client}
         self._client_ips = {}
-
-        self.command_executer = command_executer
-        self.command_context = {}
 
         self.maxplayers = maxplayers
 
@@ -206,6 +205,19 @@ class Room(object):
     def contains_client_with_ip(self, client_ip):
         return client_ip in self._client_ips
 
+    def is_mod_active(self, mod_name):
+        return mod_name in self._mods
+
+    def get_mod(self, mod_name):
+        return self._mods[mod_name]
+
+    def add_mod(self, mod):
+        self._mods[mod.name] = mod
+
+    def del_mod(self, mod):
+        assert self._mods[mod.name] is mod
+        del self._mods[mod.name]
+
     ###########################################################################
     #######################         Setters         ###########################
     ###########################################################################
@@ -295,6 +307,7 @@ class Room(object):
     def demobuffer(self, channel):
         return self.demo_recorder.demobuffer
 
+    @tracer
     def server_message(self, message, exclude=()):
         self._broadcaster.server_message(message, exclude)
 
@@ -399,6 +412,7 @@ class Room(object):
 
             swh.put_initclients(cds, existing_players)
             swh.put_resume(cds, existing_players)
+        self._broadcaster.server_message('WELCOME!') # TODO fix
 
     def _player_disconnected(self, player):
         self._players.remove(player)
@@ -486,3 +500,9 @@ class Room(object):
             self._client_change_privilege(client, client, requested_privilege)
         else:
             raise InsufficientPermissions(functionality.denied_message)
+
+    def get_target_client(self, target_pn):
+        if target_pn.is_digit():
+            return room.get_client(int(target_pn))
+        else:
+            return None

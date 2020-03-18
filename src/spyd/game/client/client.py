@@ -33,7 +33,8 @@ class Client(object):
         self.cn_handle = clientnum_handle
         self.cn = clientnum_handle.cn
         self.room = room
-        self.role = BaseRole()
+        # self.role = BaseRole()
+        self.role = MasterRole()
         self.connection_sequence_complete = False
 
         self._client_player_collection = ClientPlayerCollection(self.cn)

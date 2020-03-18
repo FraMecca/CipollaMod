@@ -145,20 +145,8 @@ class CtfBase(TeamplayBase):
         return False, None
         
     def on_player_death(self, player, killer):
-        hasflag, flag = self.owns_flag(killer)
-        print(hasflag)
-        # if  hasflag and player is not killer and player._team is killer._team:
-        #     print('rugby')
-        #     self.on_player_try_drop_flag(killer)
-        #     flag.owner = player
-        #     with self.room.broadcastbuffer(1, True) as cds:
-        #         swh.put_takeflag(cds, player, flag)
-        #     # import IPython; IPython.embed()
-        # else:
-        if True:
-            self.on_player_try_drop_flag(player)
-            super().on_player_death(player, killer)
-        print('done')
+        self.on_player_try_drop_flag(player)
+        super().on_player_death(player, killer)
         
     def _teamswitch_suicide(self, player):
         super()._teamswitch_suicide(player)

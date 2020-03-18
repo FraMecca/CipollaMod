@@ -1,5 +1,7 @@
 import time
 
+from spyd.utils.tracing import tracer, trace_class
+
 from cube2common.constants import mastermodes, disconnect_types, privileges
 from spyd.game.server_message_formatter import error
 from spyd.punitive_effects.punitive_effect_info import TimedExpiryInfo, EffectInfo
@@ -7,9 +9,11 @@ from spyd.game.client.exceptions import InsufficientPermissions
 from spyd.game.gamemode.gamemodes import get_mode_name_from_num
 from spyd.game.map.resolve_map_name import resolve_map_name
 from spyd.game.client.exceptions import InsufficientPermissions, StateError
-from spyd.game.server_message_formatter import info, smf
 from spyd.game.room.exceptions import UnknownEvent
+from spyd.game.server_message_formatter import *
 from spyd.game.client.exceptions import *
+from spyd.mods.mods_manager import ModsManager
+
 
 class BaseRole(object):
     def __init__(self):
@@ -57,7 +61,10 @@ class BaseRole(object):
             'spectate': self.on_not_allowed,
             'changemap': self.on_not_allowed,
             'duel': self.on_not_allowed,
+            'mod': self.on_not_allowed,
+            'listmods': self.on_list_mods,
             # 'pm': self.on_pm, TODO implement this
+            # 'skip': self.on_pm, TODO implement this
             'auth': self.on_auth,
             'commands': self.on_commands,
             'info': self.on_info,
@@ -78,9 +85,8 @@ class BaseRole(object):
         cmd, args = parse(text)
 
         if not cmd in self.text_actions:
-            client.server.message('Command has not exist. Type #commands for more info')
-
-        return self.text_actions[cmd](room, player, args)
+            player.client.send_server_message(error('Command has not exist. Type #commands for more info'))
+        return self.text_actions[cmd](room, player, cmd, args)
 
     def on_unknown_event(self, ev_name, *args, **kwargs):
         print("===ERROR UnknownEvent:", *args, **kwargs)
@@ -173,13 +179,9 @@ class BaseRole(object):
 
     # def on_kick(self, room, client, target_pn, reason):
     #     # TODO: Permissions checks
-
     #     target_client = room.get_client(target_pn)
-
     #     expiry_time = time.time() + (4 * SECONDS_PER_HOUR)
-
     #     client._punitive_model.add_effect('ban', target_client.host, EffectInfo(TimedExpiryInfo(expiry_time)))
-
     #     target_client.disconnect(disconnect_types.DISC_KICK, error("You were kicked by {name#kicker}", kicker=target_client))
 
     def on_map_vote(self, room, client, map_name, mode_num):
@@ -221,7 +223,7 @@ class BaseRole(object):
 
     def on_not_allowed(self, room, player, command, *args, **kwargs):
         message = 'You don\'t have the permission to execute command: ' + command
-        player.client.send_server_message(message)
+        player.client.send_server_message(denied(message))
 
     def on_commands(self, room, player, *args, **kwargs):
         available_commands = self.text_actions.keys()
@@ -237,6 +239,11 @@ class BaseRole(object):
         #TODO statsss
         pass
 
+    def on_list_mods(self, room, player, *args, **kw):
+        mods = ModsManager().list_mods()
+        print('==============', mods)
+        player.client.send_server_message(info("Available mods: " + " | ".join(mods)))
+
 
 class MasterRole(BaseRole):
     def __init__(self):
@@ -245,6 +252,7 @@ class MasterRole(BaseRole):
 
         master_actions = {
             'kick': self.on_kick,
+            'mod': self.on_mod,
         #TODO finish
         #     'ban': self.on_ban,
         #     'givemaster': self.on_givemaster,
@@ -256,26 +264,43 @@ class MasterRole(BaseRole):
 
         self.text_actions.update(master_actions)
 
-    def get_target_client(self, room, player, target_pn):
-        if not target_pn.is_digit():
-            player.client.send_server_message('Invalid player number')
-        else:
-            target_client = room.get_client(int(target_pn))
-            if target_client is None:
-                player.client.send_server_message('Player doesn\'t exist')
-            else:
-                return target_client
+    @tracer
+    def on_mod(self, room, player, cmd, args, *a, **kw):
+        if len(args) != 2:
+            player.client.send_server_message(usage_error("Wrong usage")) # TODO: make usage function
+            return
 
-        return None
+        mod_name = args[0]
+        action = args[1]
+
+        if action == 'on':
+            if ModsManager().enable(mod_name, room):
+                player.client.send_server_message(notice(f"Mod {mod_name} activated!")) # TODO: to all players
+            else:
+                player.client.send_server_message(state_error(f"Mod {mod_name} can't be enabled in the current room"))
+        elif action == 'off':
+            ModsManager().disable(mod_name, room)
+            player.client.send_server_message(notice(f"Mod {mod_name} disabled!")) # TODO: to all players
+        elif action == 'reload':
+            if ModsManager().reload(mod_name, room):
+                player.client.send_server_message(notice(f"Mod {mod_name} reloaded!")) # TODO: to all players
+            else:
+                player.client.send_server_message(notice(f"Mod {mod_name} failed to restart"))
+        else:
+            player.client.send_server_message(usage_error("choose 'on' or 'off'"))
 
 
     def on_kick(self, room, player, args):
-        target_client = get_target_client(room, player, args[0])
-
-        if target_client:
+        target_client = room.get_target_client(args[0])
+        if target_client is None:
+            player.client.send_server_message(usage_error('Invalid client number'))
+        else:
             expiry_time = time.time() + (4 * SECONDS_PER_HOUR)
             client._punitive_model.add_effect('ban', target_client.host, EffectInfo(TimedExpiryInfo(expiry_time)))
             target_client.disconnect(disconnect_types.DISC_KICK, error("You were kicked by {name#kicker}", kicker=target_client))
 
 class AdminRole(MasterRole):
     pass
+
+from spyd.utils.tracing import trace_class
+trace_class(BaseRole)
