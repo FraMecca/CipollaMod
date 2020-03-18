@@ -10,7 +10,7 @@
             "maxdown": 0,
             "interface": "0.0.0.0",
             "maxup": 0,
-            "port": 10000,
+            "port": 28795,
             "maxplayers": 32,
             "public": true
         },
@@ -21,7 +21,8 @@
             "maxup": 0,
             "port": 28785,
             "maxplayers": 24,
-            "adminpass": "password"
+            "adminpass": "password",
+            "public": true
         }
     },
     "lan_findable": true,

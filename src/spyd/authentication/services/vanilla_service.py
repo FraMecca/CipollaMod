@@ -39,3 +39,6 @@ class VanillaMasterClientService(service.MultiService):
 
     def answer_challenge(self, auth_domain, auth_id, answer):
         return self._protocol_factory.answer_challenge(auth_id, answer)
+
+from spyd.utils.tracing import trace_class
+trace_class(VanillaMasterClientService)

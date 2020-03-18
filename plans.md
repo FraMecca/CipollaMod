@@ -1,5 +1,4 @@
-- sistema di mods
-- spectate others when master
+- spectate others when master and deny unspectate
 - no locked with 0 players
 - implementare funzioni master
 - votazione mappe

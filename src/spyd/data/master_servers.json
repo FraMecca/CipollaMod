@@ -2,7 +2,7 @@
 	{
 		"type": "vanilla",
 		"enabled": true,
-		"host": "localhost",
+		"host": "master.sauerbraten.org",
 		"port": 28787,
 		"register_port": 28785,
 		"domains": ["localhost", ""]
@@ -10,9 +10,9 @@
 	{
 		"type": "vanilla",
 		"enabled": true,
-		"host": "localhost",
+		"host": "master.sauerbraten.org",
 		"port": 28787,
-		"register_port": 10000,
+		"register_port": 28795,
 		"domains": ["localhost", ""]
 	}
 ]

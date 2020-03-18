@@ -9,12 +9,12 @@ logger.setLevel(level=logging.WARN)
 
 
 class MasterClientProtocol(basic.LineReceiver):
-    delimiter = "\n"
+    delimiter = b"\n"
 
     def lineReceived(self, line):
-        line = line.strip('\r')
+        line = line.strip(b'\r')
         logger.debug("Received master server command: {!r}".format(line))
-        args = line.split(' ')
+        args = line.split(b' ')
         if not len(args): return
         cmd = args[0]
         if not cmd in possible_commands: return
@@ -27,7 +27,7 @@ class MasterClientProtocol(basic.LineReceiver):
 
     def sendLine(self, line):
         logger.debug("Sending master server command: {!r}".format(line))
-        return basic.LineReceiver.sendLine(self, line)
+        return basic.LineReceiver.sendLine(self, line.encode('utf-8'))
 
     def connectionMade(self):
         basic.LineReceiver.connectionMade(self)
@@ -44,3 +44,6 @@ class MasterClientProtocol(basic.LineReceiver):
     def send_confauth(self, auth_id, answer):
         request = "confauth {auth_id} {answer:.100s}".format(auth_id=auth_id, answer=answer)
         self.sendLine(request)
+
+from spyd.utils.tracing import trace_class
+trace_class(MasterClientProtocol)
