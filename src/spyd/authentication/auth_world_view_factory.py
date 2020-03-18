@@ -1,6 +1,4 @@
 from spyd.authentication.auth_world_view import AuthWorldView
-from spyd.authentication.services.no_op import NoOpMasterClientService
-
 
 ANY = -1
 
@@ -10,8 +8,6 @@ class AuthWorldViewFactory(object):
         # port: []
         self._registered_port_specific_auth_services = {}
         self._registered_general_auth_services = []
-
-        self._registered_general_auth_services.append(NoOpMasterClientService())
 
     def build_auth_world_view(self, port):
         auth_services = []

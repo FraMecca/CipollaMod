@@ -5,6 +5,7 @@ from spyd.utils.filtertext import filtertext
 from spyd.utils.dictionary_get import dictget
 from spyd.game.edit.selection import Selection
 from spyd.game.client.exceptions import *
+from spyd.game.server_message_formatter import *
 
 
 class ClientMessageHandler(object):
@@ -24,7 +25,7 @@ class ClientMessageHandler(object):
             'N_BOTLIMIT': self.on_botlimit,
             'N_CHECKMAPS': self.on_checkmaps,
             'N_CLEARBANS': self.on_clearbans,
-            'N_CLEARDEMOS': self.on_cleardemos,
+            'N_CLEARDEMOS': self.on_disabled,
             'N_CLIENTPING': self.on_clientping,
             'N_CLIPBOARD': self.on_clipboard,
             'N_CONNECT': self.on_connect,
@@ -39,7 +40,7 @@ class ClientMessageHandler(object):
             'N_EXPLODE': self.on_explode,
             'N_FORCEINTERMISSION': self.on_forceintermission,
             'N_GAMESPEED': self.on_gamespeed,
-            'N_GETDEMO': self.on_getdemo,
+            'N_GETDEMO': self.on_disabled,
             'N_GETMAP': self.on_getmap,
             'N_GUNSELECT': self.on_gunselect,
             'N_INITFLAGS': self.on_initflags,
@@ -48,7 +49,7 @@ class ClientMessageHandler(object):
             'N_ITEMPICKUP': self.on_itempickup,
             'N_JUMPPAD': self.on_jumppad,
             'N_KICK': self.on_kick,
-            'N_LISTDEMOS': self.on_listdemos,
+            'N_LISTDEMOS': self.on_disabled,
             'N_MAPCHANGE': self.on_mapchange,
             'N_MAPCRC': self.on_mapcrc,
             'N_MAPVOTE': self.on_mapvote,
@@ -59,7 +60,7 @@ class ClientMessageHandler(object):
             'N_PING': self.on_ping,
             'N_POS': self.on_pos,
             'N_POS': self.on_pos,
-            'N_RECORDDEMO': self.on_recorddemo,
+            'N_RECORDDEMO': self.on_disabled,
             'N_REMIP': self.on_remip,
             'N_REPAMMO': self.on_repammo,
             'N_REPLACE': self.on_replace,
@@ -72,7 +73,7 @@ class ClientMessageHandler(object):
             'N_SOUND': self.on_sound,
             'N_SPAWN': self.on_spawn,
             'N_SPECTATOR': self.on_spectator,
-            'N_STOPDEMO': self.on_stopdemo,
+            'N_STOPDEMO': self.on_disabled,
             'N_SUICIDE': self.on_suicide,
             'N_SWITCHMODEL': self.on_switchmodel,
             'N_SWITCHNAME': self.on_switchname,
@@ -92,6 +93,9 @@ class ClientMessageHandler(object):
     def on_unknown_message(self, client, room, message):
         print("===ERROR UnknownMessage:", message)
         raise UnknownMessage(message)
+
+    def on_disabled(self, client, *a, **kw):
+        client.send_server_message(red('Command disabled'))
 
     def on_shoot(self, client, room, message):
         player = client.get_player(message['aiclientnum'])
@@ -138,12 +142,8 @@ class ClientMessageHandler(object):
     def on_checkmaps(self, client, room, message):
         room.handle_client_event('check_maps', client)
 
-    
     def on_clearbans(self, client, room, message):
         room.handle_client_event('clear_bans', client)
-
-    def on_cleardemos(self, client, room, message):
-        room.handle_client_event('clear_demo', client, message['demonum'])
 
     def on_clientping(self, client, room, message):
         ping = message['ping']
@@ -228,9 +228,6 @@ class ClientMessageHandler(object):
     def on_gamespeed(self, client, room, message):
         room.handle_client_event('set_game_speed', client, message['value'])
 
-    def on_getdemo(self, client, room, message):
-        room.handle_client_event('get_demo', client, message['demonum'])
-
     def on_gunselect(self, client, room, message):
         player = client.get_player(message['aiclientnum'])
         room.handle_player_event('gunselect', player, message['gunselect'])
@@ -252,9 +249,6 @@ class ClientMessageHandler(object):
 
     def on_kick(self, client, room, message):
         room.handle_client_event('kick', client, message['target_cn'], message['reason'])
-
-    def on_listdemos(self, client, room, message):
-        room.handle_client_event('list_demos', client)
 
     def on_mapchange(self, client, room, message):
         room.handle_client_event('map_vote', client, message['map_name'], message['mode_num'])
@@ -287,9 +281,6 @@ class ClientMessageHandler(object):
     def on_pos(self, client, room, message):
         player = client.get_player(message['clientnum'])
         player.state.update_position(message['position'], message['raw_position'])
-
-    def on_recorddemo(self, client, room, message):
-        room.handle_client_event('set_demo_recording', client, message['value'])
 
     def on_remip(self, client, room, message):
         room.handle_client_event('edit_remip', client)
@@ -342,9 +333,6 @@ class ClientMessageHandler(object):
 
     def on_spectator(self, client, room, message):
         room.handle_client_event('set_spectator', client, message['target_cn'], bool(message['value']))
-
-    def on_stopdemo(self, client, room, message):
-        room.handle_client_event('stop_demo_recording', client)
 
     def on_suicide(self, client, room, message):
         player = client.get_player(message['aiclientnum'])

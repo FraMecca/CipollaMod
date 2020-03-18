@@ -20,57 +20,57 @@ class BaseRole(object):
         self.privilege = privileges.PRIV_NONE
 
         self.actions = {
-            'set_master': self.on_set_master,
-            'check_maps': self.on_check_maps,
-            'set_bot_limit': self.on_set_bot_limit,
-            'item_list': self.on_item_list,
-            'flag_list': self.on_flag_list,
-            'edit_remip': self.on_edit_remip,
-            'give_master': self.on_not_allowed,
-            'delete_bot': self.on_delete_bot,
-            'edit_new_map': self.on_edit_new_map,
-            'set_master_mode': self.on_set_master_mode,
-            'set_team': self.on_set_team,
-            'list_demos': self.on_list_demos,
-            'add_bot': self.on_add_bot,
-            'set_spectator': self.on_set_spectator,
-            'clear_demo': self.on_clear_demo,
-            'base_list': self.on_base_list,
-            'stop_demo_recording': self.on_stop_demo_recording,
-            'pause_game': self.on_pause_game,
-            'map_crc': self.on_map_crc,
-            'kick': self.on_not_allowed,
-            'map_vote': self.on_map_vote,
-            'set_demo_recording': self.on_set_demo_recording,
-            'auth_pass': self.on_auth,
-            'clear_bans': self.on_clear_bans,
-            'command': self.on_command,
-            'set_bot_balance': self.on_set_bot_balance,
-            'get_demo': self.on_get_demo,
-            'set_game_speed': self.on_set_game_speed,
-            'edit_get_map': self.on_edit_get_map,
+            'set_bot_limit':       self.on_disabled,
+            'check_maps':          self.on_disabled,
+            'edit_remip':          self.on_disabled,
+            'edit_new_map':        self.on_disabled,
+            'edit_get_map':        self.on_disabled,
+            'get_demo':            self.on_disabled,
+            'list_demos':          self.on_disabled,
+            'clear_demo':          self.on_disabled,
+            'stop_demo_recording': self.on_disabled,
+            'set_demo_recording':  self.on_disabled,
+            'add_bot':             self.on_disabled,
+            'delete_bot':          self.on_disabled,
+            'set_bot_balance':     self.on_disabled,
+            'set_game_speed':      self.on_disabled,
+
+            'set_master':          self.on_set_master,
+            'give_master':         self.on_not_allowed,
+            'set_master_mode':     self.on_set_master_mode,
+            'item_list':           self.on_item_list,
+            'flag_list':           self.on_flag_list,
+            'base_list':           self.on_base_list,
+            'set_team':            self.on_set_team,
+            'set_spectator':       self.on_set_spectator,
+            'pause_game':          self.on_pause_game,
+            'map_crc':             self.on_map_crc,
+            'kick':                self.on_not_allowed,
+            'clear_bans':          self.on_clear_bans,
+            'auth_pass':           self.on_disabled,
+            'map_vote':            self.on_map_vote,
+            'command':             self.on_command,
         }
 
         self.text_actions = {
-            'kick': self.on_not_allowed,
-            'ban': self.on_not_allowed,
-            'givemaster': self.on_not_allowed,
-            'giveadmin': self.on_not_allowed,
-            'relinquishmaster': self.on_not_allowed,
-            'dropprivileges': self.on_not_allowed,
-            'spectate': self.on_not_allowed,
-            'changemap': self.on_not_allowed,
-            'duel': self.on_not_allowed,
-            'mod': self.on_not_allowed,
-            'listmods': self.on_list_mods,
-            # 'pm': self.on_pm, TODO implement this
-            # 'skip': self.on_pm, TODO implement this
-            'auth': self.on_auth,
-            'commands': self.on_commands,
-            'info': self.on_info,
-            'stats': self.on_stats,
+            'kick':               self.on_not_allowed,
+            'ban':                self.on_not_allowed,
+            'givemaster':         self.on_not_allowed,
+            'giveadmin':          self.on_not_allowed,
+            'relinquishmaster':   self.on_not_allowed,
+            'dropprivileges':     self.on_not_allowed,
+            'spectate':           self.on_not_allowed,
+            'changemap':          self.on_not_allowed,
+            'duel':               self.on_not_allowed,
+            'mod':                self.on_not_allowed,
+            'listmods':           self.on_list_mods,
+            'pm':                 self.on_pm,
+            'skip':               self.on_skip,
+            'auth':               self.on_auth,
+            'commands':           self.on_commands,
+            'info':               self.on_info,
+            'stats':              self.on_stats,
         }
-
 
     def handle_event(self, event_name, room, *args, **kwargs):
         action = self.actions.get(event_name, self.on_unknown_event)
@@ -85,12 +85,16 @@ class BaseRole(object):
         cmd, args = parse(text)
 
         if not cmd in self.text_actions:
-            player.client.send_server_message(error('Command has not exist. Type #commands for more info'))
+            player.client.send_server_message(error('Command does not exist. Type #commands for more info'))
         return self.text_actions[cmd](room, player, cmd, args)
 
     def on_unknown_event(self, ev_name, *args, **kwargs):
         print("===ERROR UnknownEvent:", *args, **kwargs)
         raise UnknownEvent('Event: '+ev_name+' Arguments: '+str(args) + str(kwargs))
+
+    def on_disabled(self, room, client, *a, **kw):
+        client.send_server_message(red('Command disabled'))
+        pass
 
     def on_set_master(self, room, client, target_cn, password_hash, requested_privilege):
         target = room.get_client(target_cn)
@@ -110,9 +114,6 @@ class BaseRole(object):
 
     def on_flag_list(self, room, client, flag_list):
         room.gamemode.on_client_flag_list(client, flag_list)
-
-    def on_edit_remip(self, room, client):
-        pass
 
     # def on_give_master(self, room, client, client_target):
     #     room._client_change_privilege(client, client_target, 1)
@@ -142,9 +143,6 @@ class BaseRole(object):
 
         room.gamemode.on_player_try_set_team(client.get_player(), player, player.team.name, team_name)
 
-    def on_list_demos(self, room, client):
-        pass
-
     def on_add_bot(self, room, client, skill):
         pass
 
@@ -154,14 +152,8 @@ class BaseRole(object):
             raise UnknownPlayer(cn=target_pn)
         room._set_player_spectator(player, spectate)
 
-    def on_clear_demo(self, room, client, demo_id):
-        pass
-
     def on_base_list(self, room, client, base_list):
         room.gamemode.on_client_base_list(client, base_list)
-
-    def on_stop_demo_recording(self, room, client):
-        pass
 
     def on_pause_game(self, room, client, pause):
         if pause:
@@ -189,9 +181,6 @@ class BaseRole(object):
         map_name = yield resolve_map_name(room, map_name)
         room.change_map_mode(map_name, mode_name)
 
-    def on_set_demo_recording(self, room, client, value):
-        pass
-
     def on_auth(self, room, client, message):
         # passw = message[0]
         # admin_pass = config_loader('config.json')['room_bindings'][room._name.value]['adminpass']
@@ -212,9 +201,6 @@ class BaseRole(object):
     def on_set_bot_balance(self, room, client, balance):
         pass
 
-    def on_get_demo(self, room, client, demo_id):
-        pass
-
     def on_set_game_speed(self, room, client, speed):
         pass
 
@@ -223,7 +209,7 @@ class BaseRole(object):
 
     def on_not_allowed(self, room, player, command, *args, **kwargs):
         message = 'You don\'t have the permission to execute command: ' + command
-        player.client.send_server_message(denied(message))
+        player.client.send_server_message(red(message))
 
     def on_commands(self, room, player, *args, **kwargs):
         available_commands = self.text_actions.keys()
@@ -289,6 +275,13 @@ class MasterRole(BaseRole):
         else:
             player.client.send_server_message(usage_error("choose 'on' or 'off'"))
 
+    def on_skip(self, room, player, cmd, args):
+        # TODO
+        pass
+
+    def on_pm(self, room, player, cmd, args):
+        # TODO
+        pass
 
     def on_kick(self, room, player, args):
         target_client = room.get_target_client(args[0])

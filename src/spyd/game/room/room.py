@@ -5,13 +5,11 @@ from twisted.internet import reactor, defer
 
 from spyd.utils.tracing import tracer
 from cube2common.constants import MAXROOMLEN, MAXSERVERDESCLEN, MAXSERVERLEN, mastermodes, privileges
-from cube2demo.no_op_demo_recorder import NoOpDemoRecorder
 from spyd.game.client.exceptions import InsufficientPermissions, GenericError
 from spyd.game.room.client_collection import ClientCollection
 from spyd.game.room.player_collection import PlayerCollection
 from spyd.game.room.game_event_handler import GameEventHandler
 from spyd.game.room.room_broadcaster import RoomBroadcaster
-from spyd.game.room.room_demo_recorder import RoomDemoRecorder
 from spyd.game.room.room_entry_context import RoomEntryContext
 from spyd.game.room.room_map_mode_state import RoomMapModeState
 from spyd.game.server_message_formatter import smf
@@ -30,7 +28,7 @@ class Room(object):
     * Accessors to query the state of the room.
     * Setters to modify the state of the room.
     '''
-    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, maxplayers=None, demo_recorder=None):
+    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, maxplayers=None):
         self._game_clock = GameClock()
         self._attach_game_clock_event_handlers()
 
@@ -53,8 +51,6 @@ class Room(object):
         self.temporary = False
         self.decommissioned = False
 
-        self.demo_recorder = RoomDemoRecorder(self, demo_recorder or NoOpDemoRecorder())
-
         self.mastermask = 0 if self.temporary else -1
         self.mastermode = 0
         self.resume_delay = None
@@ -72,7 +68,7 @@ class Room(object):
 
         self._map_mode_state = RoomMapModeState(self, map_rotation, map_meta_data_accessor, self._game_clock, ready_up_controller_factory)
 
-        self._broadcaster = RoomBroadcaster(self._clients, self._players, self.demo_recorder)
+        self._broadcaster = RoomBroadcaster(self._clients, self._players)
 
 
         reactor.addSystemEventTrigger('before', 'flush_bindings', self._flush_messages)
@@ -283,8 +279,6 @@ class Room(object):
         self._game_clock.timeleft = 0
 
     def change_map_mode(self, map_name, mode_name):
-        if not self.is_intermission:
-            self._finalize_demo_recording()
         self._game_clock.cancel()
         return self._map_mode_state.change_map_mode(map_name, mode_name)
 
@@ -302,10 +296,6 @@ class Room(object):
     @property
     def broadcastbuffer(self):
         return self._broadcaster.broadcastbuffer
-
-    @property
-    def demobuffer(self, channel):
-        return self.demo_recorder.demobuffer
 
     @tracer
     def server_message(self, message, exclude=()):
@@ -356,7 +346,6 @@ class Room(object):
         self._broadcaster.time_left(int(math.ceil(seconds)))
 
     def _on_game_clock_intermission(self):
-        self._finalize_demo_recording()
         self._broadcaster.intermission()
 
     def _on_game_clock_intermission_ended(self):
@@ -457,13 +446,6 @@ class Room(object):
 
     def _update_current_masters(self):
         self._broadcaster.current_masters(self.mastermode, self.clients)
-
-    def _finalize_demo_recording(self):
-        self.demo_recorder.write("/tmp/abaracada.dmo")
-
-    def _initialize_demo_recording(self):
-        self.demo_recorder.initialize_demo_recording()
-
 
     #TODO remove and reimplement
     def _client_change_privilege(self, client, target, requested_privilege):

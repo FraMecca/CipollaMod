@@ -6,16 +6,14 @@ from spyd.protocol import swh
 
 
 class RoomBroadcaster(object):
-    def __init__(self, client_collection, player_collection, demo_recorder):
+    def __init__(self, client_collection, player_collection):
         self._client_collection = client_collection
         self._player_collection = player_collection
-        self._demo_recorder = demo_recorder
 
     @contextlib.contextmanager
     def broadcastbuffer(self, channel, reliable, *args):
         with self.clientbuffer(channel, reliable, *args) as cds:
             yield cds
-            self._demo_recorder.record(channel, str(cds))
 
     @property
     def clientbuffer(self):

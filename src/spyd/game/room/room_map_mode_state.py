@@ -125,5 +125,3 @@ class RoomMapModeState(object):
                 for player in client.player_iter():
                     if not player.state.is_spectator:
                         swh.put_spawnstate(cds, player)
-
-        self.room._initialize_demo_recording()

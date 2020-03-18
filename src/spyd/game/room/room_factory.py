@@ -1,4 +1,3 @@
-from cube2demo.demo_recorder import DemoRecorder
 from spyd.game.map.map_rotation import MapRotation, test_rotation_dict
 from spyd.game.room.room import Room
 from spyd.game.room.ready_up_controllers import ReadyUpControllerFactory
@@ -36,8 +35,6 @@ class RoomFactory(object):
             map_rotation_data = room_config.get('map_rotation', test_rotation_dict)
             map_rotation = MapRotation.from_dictionary(map_rotation_data)
 
-        demo_recorder = DemoRecorder()
-
         maxplayers = room_config.get('maxplayers', 12)
 
         room = Room(ready_up_controller_factory=ready_up_controller_factory,
@@ -46,8 +43,7 @@ class RoomFactory(object):
                     server_name_model=self.server_name_model,
                     map_meta_data_accessor=self.map_meta_data_accessor,
                     map_rotation=map_rotation,
-                    maxplayers=maxplayers,
-                    demo_recorder=demo_recorder)
+                    maxplayers=maxplayers)
 
         self.room_manager.add_room(room)
 
