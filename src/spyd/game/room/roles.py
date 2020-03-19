@@ -1,7 +1,5 @@
 import time
 
-from spyd.utils.tracing import tracer, trace_class
-
 from cube2common.constants import mastermodes, disconnect_types, privileges
 from spyd.game.server_message_formatter import error
 from spyd.punitive_effects.punitive_effect_info import TimedExpiryInfo, EffectInfo
@@ -294,6 +292,3 @@ class MasterRole(BaseRole):
 
 class AdminRole(MasterRole):
     pass
-
-from spyd.utils.tracing import trace_class
-trace_class(BaseRole)

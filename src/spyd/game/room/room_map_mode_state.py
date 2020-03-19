@@ -4,18 +4,18 @@ from cube2common.constants import INTERMISSIONLEN
 from spyd.game.client.exceptions import GenericError
 from spyd.game.gamemode.gamemodes import gamemodes
 from spyd.game.map.map_rotation import MapRotation
+from spyd.game.room.ready_up_controllers import NoOpReadyUpController
 from spyd.protocol import swh
 
 
 class RoomMapModeState(object):
-    def __init__(self, room, map_rotation=None, map_meta_data_accessor=None, game_clock=None, ready_up_controller_factory=None):
+    def __init__(self, room, map_rotation=None, map_meta_data_accessor=None, game_clock=None):
         self.room = room
         self._map_name = ""
         self._gamemode = None
         self._map_meta_data_accessor = map_meta_data_accessor
         self._map_rotation = map_rotation or MapRotation.from_test_data()
         self._game_clock = game_clock
-        self._ready_up_controller_factory = ready_up_controller_factory
         self._initialized = False
         self._initializing = False
         self._initializing_deferreds = []
@@ -106,7 +106,7 @@ class RoomMapModeState(object):
             for player in self.room.players:
                 self.gamemode.initialize_player(cds, player)
 
-        self.room.ready_up_controller = self._ready_up_controller_factory.make_ready_up_controller(self.room)
+        self.room.ready_up_controller = NoOpReadyUpController(self.room)
 
         for player in self.room.players:
             player.state.map_change_reset()

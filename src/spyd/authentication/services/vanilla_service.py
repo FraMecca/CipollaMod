@@ -10,11 +10,11 @@ class VanillaMasterClientService(service.MultiService):
     implementer(IAuthService)
 
     @staticmethod
-    def build(punitive_model, config):
-        host = config.get('host')
-        port = config.get('port')
-        register_port = config.get('register_port')
-        domains = config.get('domains')
+    def build(punitive_model, host, port, register_port):
+        # host = "master.sauerbraten.org" #config.get('host')
+        # port = 28787 #config.get('port')
+        # register_port = 28785# config.get('register_port')
+        domains = ["localhost", ""]
 
         punitive_model_adapter = PunitiveModelAdapter(punitive_model)
 
@@ -39,6 +39,3 @@ class VanillaMasterClientService(service.MultiService):
 
     def answer_challenge(self, auth_domain, auth_id, answer):
         return self._protocol_factory.answer_challenge(auth_id, answer)
-
-from spyd.utils.tracing import trace_class
-trace_class(VanillaMasterClientService)

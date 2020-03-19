@@ -1,5 +1,4 @@
 import spyd.authentication.services  # @UnusedImport
-from spyd.config_loader import ConfigurationError
 
 
 class MasterClientServiceFactory(object):
@@ -9,8 +8,8 @@ class MasterClientServiceFactory(object):
 
         self._service_types = service_types
 
-    def build_master_client_service(self, config):
-        master_client_type = config.get('type', None)
+    def build_master_client_service(self, host, port, register_port):
+        master_client_type = 'vanilla'
         if master_client_type is None:
             raise ConfigurationError("Master client type was not specified or was null, please specify a valid 'type' parameter.")
 
@@ -19,4 +18,4 @@ class MasterClientServiceFactory(object):
 
         master_client_class = self._service_types[master_client_type]
 
-        return master_client_class.build(self._punitive_model, config)
+        return master_client_class.build(self._punitive_model, host, port, register_port)

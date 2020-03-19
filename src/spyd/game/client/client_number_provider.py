@@ -1,5 +1,7 @@
 import heapq
 
+from spyd.config_manager import ConfigManager
+
 class ClientNumberProvider(object):
     def __init__(self, max_clients):
         self.cn_pool = list(range(max_clients))
@@ -28,11 +30,11 @@ class ClientNumberHandleProvider(object):
     def acquire_cn_handle(self):
         return ClientNumberHandle(self._client_number_provider)
 
-def get_client_number_handle_provider(config):
-    room_bindings = config.get('room_bindings', {})
+def get_client_number_handle_provider():
+    # TODO: what for? Remove
     max_client_sum = 0
-    for room_binding in room_bindings.values():
-        max_client_sum += room_binding.get('maxclients', 0)
+    for room in ConfigManager().rooms.values():
+        max_client_sum += room.maxclients
 
     client_number_provider = ClientNumberProvider(max_client_sum)
 

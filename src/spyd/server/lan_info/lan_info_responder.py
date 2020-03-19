@@ -22,11 +22,9 @@ def get_ext_info_reply_cds(rcds):
     return cds
 
 class LanInfoResponder(object):
-    def __init__(self, room_manager, lan_info_protocol, room, ext_info_config):
-        self.room_manager = room_manager
+    def __init__(self, lan_info_protocol, room):
         self.lan_info_protocol = lan_info_protocol
         self.room = room
-        self.config = ext_info_config
 
     def info_request(self, address, millis):
         cds = CubeDataStream()
@@ -116,14 +114,10 @@ class LanInfoResponder(object):
         cds.putint(player.privilege)
         cds.putint(player.state.state)
 
-        if self.config.get('send_ips', True):
-            ip = player.client.host
-            octs = ip.split('.')[:3]
-            for i in range(3):
-                cds.putbyte(int(octs[i]))
-        else:
-            for i in range(3):
-                cds.putbyte(0)
+        ip = player.client.host
+        octs = ip.split('.')[:3]
+        for i in range(3):
+            cds.putbyte(int(octs[i])) # send 0 if don't wanna send ips
 
         self.respond(bytes(cds), address)
 
@@ -163,8 +157,8 @@ class LanInfoResponder(object):
         """
         room = None
 
-        if self.config.get('wc_room_workaround', True):
-            room = self.room_manager.find_room_for_client_ip(address[0])
+        # room = self.room_manager.find_room_for_client_ip(address[0])
+        # TODO maybe remove method
 
         if room is None:
             room = self.room

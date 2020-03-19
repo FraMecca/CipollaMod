@@ -44,6 +44,3 @@ class MasterClientProtocol(basic.LineReceiver):
     def send_confauth(self, auth_id, answer):
         request = "confauth {auth_id} {answer:.100s}".format(auth_id=auth_id, answer=answer)
         self.sendLine(request)
-
-from spyd.utils.tracing import trace_class
-trace_class(MasterClientProtocol)

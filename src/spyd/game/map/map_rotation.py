@@ -4,10 +4,9 @@ test_rotation_dict = {
                   'instactf': ['forge', 'dust2'],
                   'ffa': ['complex'],
                   'coop': ['ot'],
-                  'traitors': ['ot'],
                   'insta': ['ot'],
                  },
-    'modes': ['insta', 'traitors', 'ffa', 'coop', 'instactf']
+    'modes': ['insta', 'ffa', 'coop', 'instactf']
 }
 
 class MapRotation(object):

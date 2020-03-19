@@ -12,11 +12,12 @@ from spyd.game.room.game_event_handler import GameEventHandler
 from spyd.game.room.room_broadcaster import RoomBroadcaster
 from spyd.game.room.room_entry_context import RoomEntryContext
 from spyd.game.room.room_map_mode_state import RoomMapModeState
+from spyd.game.map.map_rotation import MapRotation, test_rotation_dict
 from spyd.game.server_message_formatter import smf
 from spyd.game.timing.game_clock import GameClock
+from spyd.config_manager import ConfigManager
 from spyd.protocol import swh
 from spyd.utils.truncate import truncate
-from spyd.utils.value_model import ValueModel
 
 
 class Room(object):
@@ -28,16 +29,12 @@ class Room(object):
     * Accessors to query the state of the room.
     * Setters to modify the state of the room.
     '''
-    def __init__(self, ready_up_controller_factory, room_name=None, room_manager=None, server_name_model=None, map_rotation=None, map_meta_data_accessor=None, maxplayers=None):
+    def __init__(self, room_name=None, map_meta_data_accessor=None):
         self._game_clock = GameClock()
         self._attach_game_clock_event_handlers()
 
-        self.manager = room_manager
-
-        self._server_name_model = server_name_model or ValueModel("123456789ABCD")
-        self._name = ValueModel(room_name or "1234567")
-        self._server_name_model.observe(self._on_name_changed)
-        self._name.observe(self._on_name_changed)
+        self._server_name = ConfigManager().server.name
+        self._name = room_name
 
         self._clients = ClientCollection()
         self._players = PlayerCollection()
@@ -46,12 +43,12 @@ class Room(object):
         # '123.321.123.111': {client, client, client}
         self._client_ips = {}
 
-        self.maxplayers = maxplayers
+        self.maxplayers = ConfigManager().rooms[self._name].maxplayers
 
-        self.temporary = False
         self.decommissioned = False
 
-        self.mastermask = 0 if self.temporary else -1
+        # self.mastermask = 0 if self.temporary else -1
+        self.mastermask = -1
         self.mastermode = 0
         self.resume_delay = None
 
@@ -64,9 +61,9 @@ class Room(object):
 
         self._player_event_handler = GameEventHandler()
 
-        self.ready_up_controller = None
-
-        self._map_mode_state = RoomMapModeState(self, map_rotation, map_meta_data_accessor, self._game_clock, ready_up_controller_factory)
+        map_rotation_data = test_rotation_dict
+        map_rotation = MapRotation.from_dictionary(map_rotation_data)
+        self._map_mode_state = RoomMapModeState(self, map_rotation, map_meta_data_accessor, self._game_clock)
 
         self._broadcaster = RoomBroadcaster(self._clients, self._players)
 
@@ -83,16 +80,17 @@ class Room(object):
 
     @property
     def name(self):
-        return self._name.value
+        return self._name
 
     @name.setter
     def name(self, value):
-        self._name.value = truncate(value, MAXROOMLEN)
+        self._name = truncate(value, MAXROOMLEN)
 
     @property
     def lan_info_name(self):
-        server_name = truncate(self._server_name_model.value, MAXSERVERLEN)
-        room_title = smf.format("{server_name} #{room.name}", room=self, server_name=server_name)
+        server_name = truncate(self._server_name, MAXSERVERLEN)
+        # room_title = smf.format("{server_name} #{room.name}", room=self, server_name=server_name)
+        room_title = self.name
         return room_title
 
     def get_entry_context(self, client, player):
@@ -261,10 +259,6 @@ class Room(object):
             for remaining_client in self._clients.to_iterator():
                 swh.put_cdis(cds, remaining_client)
 
-        self.ready_up_controller.on_client_leave(client)
-
-        self.manager.on_room_player_count_changed(self)
-
     def pause(self):
         self._game_clock.pause()
 
@@ -409,8 +403,9 @@ class Room(object):
         self.gamemode.on_player_disconnected(player)
 
     def _get_room_title(self):
-        server_name = truncate(self._server_name_model.value, MAXSERVERLEN)
-        room_title = smf.format("{server_name} {room_title#room.name}", room=self, server_name=server_name)
+        server_name = truncate(self._server_name, MAXSERVERLEN)
+        # room_title = smf.format("{server_name} {room_title#room.name}", room=self, server_name=server_name)
+        room_title = self.name
         return room_title
 
     def _put_room_title(self, cds, client):

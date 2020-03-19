@@ -4,7 +4,6 @@ from spyd.game.server_message_formatter import red, yellow
 from spyd.protocol import swh
 from spyd.mods.abstract_mod import AbstractMod
 
-from spyd.utils.tracing import trace_class
 
 class InstaCtfRugby(AbstractMod):
     name = "rugby"
@@ -38,5 +37,3 @@ class InstaCtfRugby(AbstractMod):
                         f'{yellow(target.name)}: {red(float(distance)/100)} ogro feet')
         else:
             self.original_method(player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz)
-
-trace_class(InstaCtfRugby)
