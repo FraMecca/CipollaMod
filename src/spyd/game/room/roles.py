@@ -12,6 +12,8 @@ from spyd.game.server_message_formatter import *
 from spyd.game.client.exceptions import *
 from spyd.mods.mods_manager import ModsManager
 
+from spyd.utils.tracing import *
+
 
 class BaseRole(object):
     def __init__(self):
@@ -92,6 +94,14 @@ class BaseRole(object):
 
     def on_disabled(self, room, client, *a, **kw):
         client.send_server_message(red('Command disabled'))
+        pass
+
+    def on_pm(self, room, player, cmd, args):
+        # TODO
+        pass
+
+    def on_skip(self, room, player, cmd, args):
+        # TODO
         pass
 
     def on_set_master(self, room, client, target_cn, password_hash, requested_privilege):
@@ -272,14 +282,6 @@ class MasterRole(BaseRole):
                 player.client.send_server_message(notice(f"Mod {mod_name} failed to restart"))
         else:
             player.client.send_server_message(usage_error("choose 'on' or 'off'"))
-
-    def on_skip(self, room, player, cmd, args):
-        # TODO
-        pass
-
-    def on_pm(self, room, player, cmd, args):
-        # TODO
-        pass
 
     def on_kick(self, room, player, args):
         target_client = room.get_target_client(args[0])

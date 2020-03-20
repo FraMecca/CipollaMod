@@ -56,3 +56,14 @@ error       = wrapper_function('error',  'Error')
 state_error = wrapper_function('error',  'State Error')
 usage_error = wrapper_function('error',  'Usage Error')
 denied      = wrapper_function('error',  'Denied')
+
+def format_cfg_message(msg, room, player):
+    vars = {
+        'server_name': room.server_name,
+        'room_name': room.name,
+        'player_name': player.name,
+        'team': player.team_name,
+    }
+    vars.update(colors)
+    return msg % vars
+    

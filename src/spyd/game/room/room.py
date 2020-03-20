@@ -3,7 +3,6 @@ import traceback
 
 from twisted.internet import reactor, defer
 
-from spyd.utils.tracing import tracer
 from cube2common.constants import MAXROOMLEN, MAXSERVERDESCLEN, MAXSERVERLEN, mastermodes, privileges
 from spyd.game.client.exceptions import InsufficientPermissions, GenericError
 from spyd.game.room.client_collection import ClientCollection
@@ -13,7 +12,7 @@ from spyd.game.room.room_broadcaster import RoomBroadcaster
 from spyd.game.room.room_entry_context import RoomEntryContext
 from spyd.game.room.room_map_mode_state import RoomMapModeState
 from spyd.game.map.map_rotation import MapRotation, test_rotation_dict
-from spyd.game.server_message_formatter import smf
+from spyd.game.server_message_formatter import smf, format_cfg_message
 from spyd.game.timing.game_clock import GameClock
 from spyd.config_manager import ConfigManager
 from spyd.protocol import swh
@@ -39,6 +38,7 @@ class Room(object):
         self._clients = ClientCollection()
         self._players = PlayerCollection()
         self._mods = {} # TODO: activate mods at room initialization
+        self._messages = ConfigManager().rooms[room_name].messages
 
         # '123.321.123.111': {client, client, client}
         self._client_ips = {}
@@ -81,6 +81,10 @@ class Room(object):
     @property
     def name(self):
         return self._name
+
+    @property
+    def server_name(self):
+        return self._server_name
 
     @name.setter
     def name(self, value):
@@ -291,7 +295,6 @@ class Room(object):
     def broadcastbuffer(self):
         return self._broadcaster.broadcastbuffer
 
-    @tracer
     def server_message(self, message, exclude=()):
         self._broadcaster.server_message(message, exclude)
 
@@ -395,12 +398,29 @@ class Room(object):
 
             swh.put_initclients(cds, existing_players)
             swh.put_resume(cds, existing_players)
-        self._broadcaster.server_message('WELCOME!') # TODO fix
+
+        print(self._messages)
+        if 'server_welcome' in self._messages:
+            message = self._messages['server_welcome']
+            formatted = format_cfg_message(message, self, client.get_player())
+            defer.maybeDeferred(client.send_server_message, formatted)
+        if 'player_connect' in self._messages:
+            message = self._messages['player_connect']
+            formatted = format_cfg_message(message, self, client.get_player())
+            defer.maybeDeferred(self.public_message, formatted)
 
     def _player_disconnected(self, player):
         self._players.remove(player)
         self._broadcaster.player_disconnected(player)
         self.gamemode.on_player_disconnected(player)
+        if 'server_goodbye' in self._messages:
+            message = self._messages['server_goodbye']
+            formatted = format_cfg_message(message, self, player)
+            defer.maybeDeferred(player.client.send_server_message, formatted)
+        if 'player_disconnect' in self._messages:
+            message = self._messages['player_disconnect']
+            formatted = format_cfg_message(message, self, player)
+            defer.maybeDeferred(self.public_message, formatted)
 
     def _get_room_title(self):
         server_name = truncate(self._server_name, MAXSERVERLEN)
@@ -419,6 +439,10 @@ class Room(object):
     def _on_name_changed(self, *args):
         for client in self.clients:
             self._send_room_title(client)
+
+    def public_message(self, msg):
+        if msg:
+            self._broadcaster.server_message(msg)
 
     def _set_player_spectator(self, player, spectate):
         if not spectate and player.state.is_spectator:

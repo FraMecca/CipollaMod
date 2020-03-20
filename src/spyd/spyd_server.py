@@ -58,6 +58,7 @@ class SpydServer(object):
         self.lan_info_service.setServiceParent(self.root_service)
 
         self._initialize_rooms()
+        self._initialize_master_clients()
 
         reactor.addSystemEventTrigger("before", "shutdown", self._before_shutdown, None)
 
@@ -104,7 +105,8 @@ class SpydServer(object):
                 # port is the port of the room that needs to be registered in the master server
                 master_url = roomCfg.announce[0]
                 master_port = roomCfg.announce[1]
-                master_client_service = self.master_client_service_factory.build_master_client_service(master_server_config)
                 register_port = roomCfg.port
+                master_client_service = self.master_client_service_factory.build_master_client_service(master_url, master_port, register_port)
                 self.auth_world_view_factory.register_auth_service(master_client_service, register_port)
-                master_client_service.setServiceParent(self.root_service, host, port, register_port)
+                # master_client_service.setServiceParent(self.root_service, master_url, master_port, register_port)
+                master_client_service.setServiceParent(self.root_service)

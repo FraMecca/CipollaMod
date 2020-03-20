@@ -33,3 +33,14 @@ def asbool(key, value):
 
 def missing_keys(keys, obj):
     return set(keys) - set(obj)
+
+def validate_message_file(filename):
+    from configparser import ConfigParser
+    cfg = ConfigParser()
+    try:
+        cfg.read(filename)
+        msgs = cfg['Room Messages']
+        return dict(map(lambda k: (k, msgs.get(k, raw=True)),
+                        ['player_connect', 'player_disconnect', 'server_welcome', 'server_goodbye']))
+    except:
+        raise ConfigurationError(f'Invalid message file: {filename}.')

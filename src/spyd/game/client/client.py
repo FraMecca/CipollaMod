@@ -21,6 +21,7 @@ from spyd.protocol import swh
 from spyd.utils.constrain import ConstraintViolation
 from spyd.utils.filtertext import filtertext
 from spyd.utils.ping_buffer import PingBuffer
+from spyd.utils.tracing import tracer
 
 
 logger = logging.getLogger(__name__)
@@ -33,8 +34,7 @@ class Client(object):
         self.cn_handle = clientnum_handle
         self.cn = clientnum_handle.cn
         self.room = room
-        # self.role = BaseRole()
-        self.role = MasterRole()
+        self.role = BaseRole()
         self.connection_sequence_complete = False
 
         self._client_player_collection = ClientPlayerCollection(self.cn)
@@ -128,9 +128,11 @@ class Client(object):
 
         self.connection_sequence_complete = True
 
+    @tracer
     def send_server_message(self, message):
-        with self.sendbuffer(1, True) as cds:
-            swh.put_servmsg(cds, message)
+        if message:
+            with self.sendbuffer(1, True) as cds:
+                swh.put_servmsg(cds, message)
 
     def change_role(self, new_role):
         self.role = new_role

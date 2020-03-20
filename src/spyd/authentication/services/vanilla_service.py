@@ -11,9 +11,6 @@ class VanillaMasterClientService(service.MultiService):
 
     @staticmethod
     def build(punitive_model, host, port, register_port):
-        # host = "master.sauerbraten.org" #config.get('host')
-        # port = 28787 #config.get('port')
-        # register_port = 28785# config.get('register_port')
         domains = ["localhost", ""]
 
         punitive_model_adapter = PunitiveModelAdapter(punitive_model)

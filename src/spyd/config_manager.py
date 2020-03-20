@@ -10,9 +10,9 @@ from spyd.utils.configuration_utils import *
 
 class ConfigManager(metaclass=Singleton):
     def __init__(self, cfgfile):
-        from configparser import SafeConfigParser
+        from configparser import ConfigParser
 
-        cfg = SafeConfigParser()
+        cfg = ConfigParser()
         cfg.read(cfgfile)
 
         self.server, self.maps, self.rooms = {}, {}, {}
@@ -30,6 +30,7 @@ class ConfigManager(metaclass=Singleton):
             'maxup': asint,
             'mods_enabled': asstr,
             'mods_disabled': asstr,
+            'messages': asstr,
         }
         sections = {
             'SERVER': { 'name': asstr, 'info': asstr, 'packages': asstr, 'shutdowncountdown': asint },
@@ -67,6 +68,9 @@ class ConfigManager(metaclass=Singleton):
                     key, value = tp
                     return key, roomKeys[key](key, value) # key to value transformed
                 self.rooms[room] = dict(map(to_tuple, cfg[room].items()))
+
+            self.rooms[room]['messages'] = validate_message_file(self.rooms[room]['messages'])
+
             # check master url is fine
             announce = self.rooms[room]['announce']
             if announce != "":

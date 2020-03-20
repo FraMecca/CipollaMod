@@ -15,6 +15,12 @@ import spyd as spyd_root_module
 from spyd.spyd_server import SpydServer
 
 
+### TRACING ###
+from spyd.utils.tracing import trace_class
+from spyd.game.room.roles import BaseRole
+### END TRACING ###
+
+
 def fatal(msg):
     logger.critical(msg)
     sys.exit(1)

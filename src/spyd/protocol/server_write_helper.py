@@ -29,6 +29,7 @@ class swh(object):
     @staticmethod
     def put_welcome(data_stream):
         data_stream.putint(message_types.N_WELCOME)
+        # pass
 
     @staticmethod
     def put_mastermode(data_stream, mastermode):
