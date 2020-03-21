@@ -5,6 +5,8 @@ from spyd.utils.constrain import constrain_range
 from spyd.protocol import swh
 from spyd.game.room.exceptions import UnknownEvent
 
+from spyd.utils.tracing import tracer
+
 class GameEventHandler(object):
     def __init__(self):
         self.actions = {
@@ -161,7 +163,6 @@ class GameEventHandler(object):
         room.gamemode.on_player_request_spawn(player)
 
     def on_game_chat(self, room, player, text):
-        if text[0] == "#":
-            player.client.role.handle_text_event(text, room, player)
-        else:
-            swh.put_text(player.state.messages, text)
+        swh.put_text(player.state.messages, text)
+
+from spyd.utils.tracing import trace_class; trace_class(GameEventHandler)

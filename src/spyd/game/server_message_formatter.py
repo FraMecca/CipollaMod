@@ -14,7 +14,10 @@ def action_wrapper(action):
     return color_wrappers.orange("#{}".format(action))
 
 def yellow(text):
-    return f"{colors['blue']}{text}{colors['white']}"
+    return f"{colors['yellow']}{text}{colors['white']}"
+
+def orange(text):
+    return f"{colors['orange']}{text}{colors['white']}"
 
 def red(text):
     return f"{colors['red']}{text}{colors['white']}"
@@ -49,7 +52,7 @@ def wrapper_function(prefix_wrapper, prefix):
         msg_fmt = smf.format(prefix_fmt, prefix=prefix, msg_fmt=msg_fmt)
         return smf.vformat(msg_fmt, args, kwargs)
     return function
-    
+
 info        = wrapper_function('info',   'Info')
 notice      = wrapper_function('notice', 'Notice')
 error       = wrapper_function('error',  'Error')
@@ -66,4 +69,3 @@ def format_cfg_message(msg, room, player):
     }
     vars.update(colors)
     return msg % vars
-    

@@ -31,7 +31,7 @@ class PlayerCollection(object):
                                 key=team_of)))
 
     def by_pn(self, pn):
-        return self._players[pn]
+        return self._players.get(pn, None)
 
     def is_name_duplicate(self, name):
         name_count = 0

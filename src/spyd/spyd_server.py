@@ -15,6 +15,7 @@ from spyd.game.map.async_map_meta_data_accessor import AsyncMapMetaDataAccessor
 from spyd.game.room.room_bindings import RoomBindings
 from spyd.game.room.room import Room
 from spyd.game.server_message_formatter import notice
+from spyd.mods.mods_manager import ModsManager
 from spyd.punitive_effects.punitive_model import PunitiveModel
 from spyd.server.binding.binding_service import BindingService
 from spyd.server.binding.client_protocol_factory import ClientProtocolFactory
@@ -82,6 +83,11 @@ class SpydServer(object):
             self.binding_service.add_binding(interface, port, maxclients, maxdown, maxup, max_duplicate_peers)
             self.room_bindings.add_room(port, room, '')
             self.lan_info_service.add_lan_info_for_room(room, interface, port)
+
+            #TODO better validation of room
+            for mod_name in roomCfg.mods_enabled.split(','):
+                if mod_name != '""' and ModsManager().enable(mod_name, room):
+                    print('enabled mod: ' + mod_name)
 
     def _before_shutdown(self, config):
         shutdown_countdown = ConfigManager().server.shutdowncountdown

@@ -241,15 +241,10 @@ class BaseRole(object):
     #     client._punitive_model.add_effect('ban', target_client.host, EffectInfo(TimedExpiryInfo(expiry_time)))
     #     target_client.disconnect(disconnect_types.DISC_KICK, error("You were kicked by {name#kicker}", kicker=target_client))
 
-    def on_auth(self, room, client, message):
-        # passw = message[0]
-        # admin_pass = config_loader('config.json')['room_bindings'][room._name.value]['adminpass']
-
-        # if passw == admin_pass:
-        #     room._client_change_privilege(client, client, 3)
-        # else:
-        #     raise WrongCredentials("Eheh, try again :)")
-        pass
+    def on_map_vote(self, room, client, map_name, mode_num):
+        mode_name = get_mode_name_from_num(mode_num)
+        map_name = yield resolve_map_name(room, map_name)
+        room.change_map_mode(map_name, mode_name)
 
     def on_clear_bans(self, room, client):
         # TODO: Permissions checks
@@ -587,23 +582,10 @@ class BaseRole(object):
         selection = Selection.from_message(message)
         room.handle_player_event('edit_flip', player, selection)
 
-
 class MasterRole(BaseRole):
     def __init__(self):
         super().__init__()
         self.privilege = privileges.PRIV_MASTER
-
-        master_actions = {
-            'kick': self.on_kick,
-            'mod': self.on_mod,
-        #TODO finish
-        #     'ban': self.on_ban,
-        #     'givemaster': self.on_givemaster,
-        #     'spectate': self.on_spectate,
-        #     'changemap': self.on_changemap,
-        #     'duel': self.on_duel,
-        #     'dropprivileges': self.on_drop_privileges,
-        }
         self.actions.update({
             'map_vote':     self.on_map_vote,
             'N_MASTERMODE': self.on_mastermode,
@@ -659,7 +641,7 @@ class MasterRole(BaseRole):
         else:
             client.send_server_message(usage_error('Invalid cn'))
 
-
-
 class AdminRole(MasterRole):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.privilege = privileges.PRIV_ADMIN

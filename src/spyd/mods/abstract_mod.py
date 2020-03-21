@@ -1,5 +1,6 @@
 class AbstractMod(object):
     canLoad = False # specify that mod can be loaded at runtime
+
     @property
     def name(self):
         raise NotImplementedError

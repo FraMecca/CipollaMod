@@ -11,6 +11,7 @@ from spyd.game.room.game_event_handler import GameEventHandler
 from spyd.game.room.room_broadcaster import RoomBroadcaster
 from spyd.game.room.room_entry_context import RoomEntryContext
 from spyd.game.room.room_map_mode_state import RoomMapModeState
+from spyd.game.room.roles import AdminRole, MasterRole, BaseRole
 from spyd.game.map.map_rotation import MapRotation, test_rotation_dict
 from spyd.game.server_message_formatter import smf, format_cfg_message
 from spyd.game.timing.game_clock import GameClock
@@ -37,7 +38,7 @@ class Room(object):
 
         self._clients = ClientCollection()
         self._players = PlayerCollection()
-        self._mods = {} # TODO: activate mods at room initialization
+        self._mods = {}
         self._messages = ConfigManager().rooms[room_name].messages
 
         # '123.321.123.111': {client, client, client}
@@ -151,6 +152,10 @@ class Room(object):
 
     def get_player(self, pn):
         return self._players.by_pn(pn)
+
+    def get_player_by_name(self, name):
+        players = dict(map(lambda p: (p.name, p), self.players))
+        return players.get(name, None)
 
     @property
     def is_paused(self):
@@ -455,17 +460,19 @@ class Room(object):
     def _update_current_masters(self):
         self._broadcaster.current_masters(self.mastermode, self.clients)
 
-    #TODO remove and reimplement
-    def _client_change_privilege(self, client, target, requested_privilege):
+    def change_privilege(self, target, requested_privilege):
         if requested_privilege == privileges.PRIV_NONE:
+            target.role = BaseRole()
             self.admins.discard(target)
             self.auths.discard(target)
             self.masters.discard(target)
         elif requested_privilege == privileges.PRIV_MASTER:
+            target.role = MasterRole()
             self.masters.add(target)
         elif requested_privilege == privileges.PRIV_AUTH:
             self.auths.add(target)
         elif requested_privilege == privileges.PRIV_ADMIN:
+            target.role = AdminRole()
             self.admins.add(target)
         self._update_current_masters()
 

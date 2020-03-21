@@ -35,7 +35,7 @@ class ConfigManager(metaclass=Singleton):
             'messages': asstr,
         }
         sections = {
-            'SERVER': { 'name': asstr, 'info': asstr, 'packages': asstr, 'shutdowncountdown': asint },
+            'SERVER': { 'name': asstr, 'info': asstr, 'packages': asstr, 'shutdowncountdown': asint, 'adminpass': asstr },
             'MAPS': dict(zip(game_modes, repeat(asjsonobj)))
         }
 
@@ -58,6 +58,7 @@ class ConfigManager(metaclass=Singleton):
                 def to_tuple(key):
                     return key, validators[key](key, cfg[section][key])
                 setattr(self, section.lower(), dict(map(to_tuple, section_keys)))
+
         possible_rooms = list(filter(lambda s: s not in set(sections.keys()), cfg.sections()))
         for room in possible_rooms:
             if missing_keys(roomKeys.keys(), cfg[room].keys()):
