@@ -68,7 +68,7 @@ class Room(object):
 
         self._broadcaster = RoomBroadcaster(self._clients, self._players)
 
-        self.await_map_mode_initialized()
+        self.await_map_mode_initialized() # start game immediately, even if no players
 
         reactor.addSystemEventTrigger('before', 'flush_bindings', self._flush_messages)
 
