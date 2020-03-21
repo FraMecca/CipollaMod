@@ -18,6 +18,10 @@ from spyd.spyd_server import SpydServer
 ### TRACING ###
 from spyd.utils.tracing import trace_class
 from spyd.game.room.roles import BaseRole
+from spyd.game.room.room_map_mode_state import RoomMapModeState
+from spyd.game.timing.game_clock import GameClock
+trace_class(GameClock)
+trace_class(RoomMapModeState)
 
 ### END TRACING ###
 

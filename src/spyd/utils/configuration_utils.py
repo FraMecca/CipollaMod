@@ -17,7 +17,7 @@ def asjsonobj(key, value):
     if exists(value):
         try:
             with open(value, 'r') as f:
-                jloads(f.read())
+                return jloads(f.read())
         except:
             raise ConfigurationError(f"{value} is not a valid json")
     else:

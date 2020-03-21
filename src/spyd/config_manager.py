@@ -33,7 +33,7 @@ class ConfigManager(metaclass=Singleton):
         }
         sections = {
             'SERVER': { 'name': asstr, 'info': asstr, 'packages': asstr, 'shutdowncountdown': asint },
-            'MAPS': dict(zip(('ctf', 'instactf', 'efficctf', 'effic', 'ffa', 'insta'), repeat(asjsonobj)))
+            'MAPS': dict(zip(('coop', 'ctf', 'instactf', 'efficctf', 'effic', 'ffa', 'insta'), repeat(asjsonobj)))
         }
 
         # later, class attributes will become named tuples
@@ -87,6 +87,20 @@ class ConfigManager(metaclass=Singleton):
         self.server = Server(*self.server.values(),
                              available_maps=get_available_maps(self.server['packages']))
         self.maps = Maps(*self.maps.values())
+
+    def get_rotation_dict(self):
+        return {
+            'rotations': {
+                'instactf': self.maps.instactf,
+                'ffa': self.maps.ffa,
+                'effic': self.maps.effic,
+                'ccop': self.maps.coop,
+                'insta': self.maps.insta,
+                'ctf': self.maps.ctf,
+                'efficctf': self.maps.efficctf,
+            },
+            'modes': ['insta', 'ffa', 'effic', 'coop', 'ctf', 'efficctf', 'instactf']
+        }
 
 def get_available_maps(package_dir):
     def get(package_dir):

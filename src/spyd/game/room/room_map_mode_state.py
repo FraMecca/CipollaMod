@@ -14,7 +14,7 @@ class RoomMapModeState(object):
         self._map_name = ""
         self._gamemode = None
         self._map_meta_data_accessor = map_meta_data_accessor
-        self._map_rotation = map_rotation or MapRotation.from_test_data()
+        self._map_rotation = map_rotation
         self._game_clock = game_clock
         self._initialized = False
         self._initializing = False

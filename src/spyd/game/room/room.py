@@ -61,12 +61,11 @@ class Room(object):
 
         self._player_event_handler = GameEventHandler()
 
-        map_rotation_data = test_rotation_dict
-        map_rotation = MapRotation.from_dictionary(map_rotation_data)
+        # map_rotation_data = test_rotation_dict # don't load this, load the one specified in config
+        map_rotation = MapRotation.from_dictionary(ConfigManager().get_rotation_dict())
         self._map_mode_state = RoomMapModeState(self, map_rotation, map_meta_data_accessor, self._game_clock)
 
         self._broadcaster = RoomBroadcaster(self._clients, self._players)
-
 
         reactor.addSystemEventTrigger('before', 'flush_bindings', self._flush_messages)
 
