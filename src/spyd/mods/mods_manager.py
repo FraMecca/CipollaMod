@@ -49,7 +49,7 @@ class ModsManager(metaclass=Singleton):
     def enable(self, mod_name, room):
         modCls = self.mods[mod_name] # is a class, must be instantiated
         mod = modCls()
-        if mod.can_attach(room):
+        if not room.is_mod_active(mod_name) and mod.can_attach(room):
             mod.setup(room)
             room.add_mod(mod)
             return True

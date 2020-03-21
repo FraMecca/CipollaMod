@@ -29,7 +29,6 @@ class ConfigManager(metaclass=Singleton):
             'maxdown': asint,
             'maxup': asint,
             'mods_enabled': asstr,
-            'mods_disabled': asstr,
             'messages': asstr,
         }
         sections = {
