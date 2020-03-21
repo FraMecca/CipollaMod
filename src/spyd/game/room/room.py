@@ -194,9 +194,6 @@ class Room(object):
     def mode_name(self):
         return self._map_mode_state.mode_name
 
-    def get_map_names(self):
-        return self._map_mode_state.get_map_names()
-
     def is_name_duplicate(self, name):
         return self._players.is_name_duplicate(name)
 
@@ -399,7 +396,6 @@ class Room(object):
             swh.put_initclients(cds, existing_players)
             swh.put_resume(cds, existing_players)
 
-        print(self._messages)
         if 'server_welcome' in self._messages:
             message = self._messages['server_welcome']
             formatted = format_cfg_message(message, self, client.get_player())

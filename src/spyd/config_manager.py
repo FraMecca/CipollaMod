@@ -37,7 +37,7 @@ class ConfigManager(metaclass=Singleton):
         }
 
         # later, class attributes will become named tuples
-        Server = namedtuple('Server', sections['SERVER'].keys())
+        Server = namedtuple('Server', list(sections['SERVER'].keys()) + ['available_maps'])
         Maps = namedtuple('Maps', sections['MAPS'].keys())
         Room = namedtuple('Room', roomKeys.keys())
 
@@ -84,5 +84,14 @@ class ConfigManager(metaclass=Singleton):
         # transform to named tuples
         for rname, room in self.rooms.items():
             self.rooms[rname] = Room(*room.values())
-        self.server = Server(*self.server.values())
+        self.server = Server(*self.server.values(),
+                             available_maps=get_available_maps(self.server['packages']))
         self.maps = Maps(*self.maps.values())
+
+def get_available_maps(package_dir):
+    def get(package_dir):
+        import glob
+        package_dir += 'base/' if package_dir == '/' else '/base/'
+        for path in glob.glob(package_dir+'*.ogz'):
+            yield path.split('/')[-1][:-4] # remove .ogz
+    return tuple(get(package_dir))

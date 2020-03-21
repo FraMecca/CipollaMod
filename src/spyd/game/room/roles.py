@@ -11,6 +11,7 @@ from spyd.game.room.exceptions import UnknownEvent
 from spyd.game.server_message_formatter import *
 from spyd.game.client.exceptions import *
 from spyd.mods.mods_manager import ModsManager
+from spyd.game.player.player import Player
 
 from spyd.utils.tracing import *
 
@@ -48,7 +49,7 @@ class BaseRole(object):
             'kick':                self.on_not_allowed,
             'clear_bans':          self.on_clear_bans,
             'auth_pass':           self.on_disabled,
-            'map_vote':            self.on_map_vote,
+            'map_vote':            self.on_not_allowed,
             'command':             self.on_command,
         }
 
@@ -184,11 +185,6 @@ class BaseRole(object):
     #     client._punitive_model.add_effect('ban', target_client.host, EffectInfo(TimedExpiryInfo(expiry_time)))
     #     target_client.disconnect(disconnect_types.DISC_KICK, error("You were kicked by {name#kicker}", kicker=target_client))
 
-    def on_map_vote(self, room, client, map_name, mode_num):
-        mode_name = get_mode_name_from_num(mode_num)
-        map_name = yield resolve_map_name(room, map_name)
-        room.change_map_mode(map_name, mode_name)
-
     def on_auth(self, room, client, message):
         # passw = message[0]
         # admin_pass = config_loader('config.json')['room_bindings'][room._name.value]['adminpass']
@@ -215,9 +211,16 @@ class BaseRole(object):
     def on_edit_get_map(self, room, client):
         pass
 
-    def on_not_allowed(self, room, player, command, *args, **kwargs):
+    def on_not_allowed(self, room, caller, command, *args, **kwargs):
+        from spyd.game.client.client import Client
         message = 'You don\'t have the permission to execute command: ' + command
-        player.client.send_server_message(red(message))
+        print(caller)
+        if isinstance(caller, Player):
+            caller.client.send_server_message(red(message))
+        elif isinstance(caller, Client):
+            caller.send_server_message(red(message))
+        else:
+            assert False
 
     def on_commands(self, room, player, *args, **kwargs):
         available_commands = self.text_actions.keys()
@@ -255,10 +258,18 @@ class MasterRole(BaseRole):
         #     'duel': self.on_duel,
         #     'dropprivileges': self.on_drop_privileges,
         }
+        self.actions.update({
+            'map_vote': self.on_map_vote,
+            })
 
         self.text_actions.update(master_actions)
 
     @tracer
+    def on_map_vote(self, room, client, map_name, mode_num):
+        mode_name = get_mode_name_from_num(mode_num)
+        map_name = resolve_map_name(room, map_name)
+        room.change_map_mode(map_name, mode_name)
+
     def on_mod(self, room, player, cmd, args, *a, **kw):
         if len(args) != 2:
             player.client.send_server_message(usage_error("Wrong usage")) # TODO: make usage function

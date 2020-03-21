@@ -1,11 +1,13 @@
-from cube2common.constants import MAXTEAMLEN, MAXNAMELEN
 from cube2common.vec import vec
+from cube2common.constants import *
 from spyd.protocol import swh
 from spyd.utils.filtertext import filtertext
 from spyd.utils.dictionary_get import dictget
 from spyd.game.edit.selection import Selection
 from spyd.game.client.exceptions import *
 from spyd.game.server_message_formatter import *
+
+from spyd.utils.tracing import tracer
 
 
 class ClientMessageHandler(object):
@@ -251,13 +253,16 @@ class ClientMessageHandler(object):
         room.handle_client_event('kick', client, message['target_cn'], message['reason'])
 
     def on_mapchange(self, client, room, message):
-        room.handle_client_event('map_vote', client, message['map_name'], message['mode_num'])
+        # TODO: never called?
+        # room.handle_client_event('map_vote', client, message['map_name'], message['mode_num'])
+        pass
 
     def on_mapcrc(self, client, room, message):
         room.handle_client_event('map_crc', client, message['mapcrc'])
 
+    @tracer
     def on_mapvote(self, client, room, message):
-        room.handle_client_event('map_vote', client, message['map_name'], message['mode_num'])
+        client.role.handle_event('map_vote', room, client, message['map_name'], message['mode_num'])
 
     def on_mastermode(self, client, room, message):
         room.handle_client_event('set_master_mode', client, message['mastermode'])

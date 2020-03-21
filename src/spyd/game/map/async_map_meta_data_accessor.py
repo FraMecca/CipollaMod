@@ -5,7 +5,6 @@ import sys
 from twisted.internet import defer, utils
 from spyd.utils.list_to_unicode import list_to_unicode
 
-
 map_data_reader_filename = os.path.join(os.path.dirname(__file__), 'map_data_reader_process.py')
 
 def run_map_data_reader_process(args):
