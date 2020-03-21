@@ -26,7 +26,7 @@ class ClientCollection(object):
         return iter(self._clients.values())
 
     def by_cn(self, cn):
-        return self._clients.get(cn, default=None)
+        return self._clients.get(cn, None)
 
     def broadcast(self, channel, data, reliable=False, exclude=None, clients=None):
         clients = clients or iter(self._clients.values())

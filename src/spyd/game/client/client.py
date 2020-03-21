@@ -10,7 +10,6 @@ from cube2common.constants import disconnect_types, MAXNAMELEN
 from cube2protocol.cube_data_stream import CubeDataStream
 from spyd.game.client.client_auth_state import ClientAuthState
 from spyd.game.client.client_player_collection import ClientPlayerCollection
-from spyd.game.client.client_message_handler import ClientMessageHandler
 from spyd.game.client.exceptions import *
 from spyd.game.room.exceptions import *
 from spyd.game.player.player import Player
@@ -34,7 +33,8 @@ class Client(object):
         self.cn_handle = clientnum_handle
         self.cn = clientnum_handle.cn
         self.room = room
-        self.role = BaseRole()
+        # self.role = BaseRole()
+        self.role = MasterRole()
         self.connection_sequence_complete = False
 
         self._client_player_collection = ClientPlayerCollection(self.cn)
@@ -59,8 +59,6 @@ class Client(object):
 
 
         self.command_context = {}
-
-        self.message_handler = ClientMessageHandler()
 
 
     def __format__(self, format_spec):
@@ -217,7 +215,7 @@ class Client(object):
                 return
             else:
                 try:
-                    self.message_handler.handle_message(self, self.room, message_type, message)
+                    self.role.handle_message(self, self.room, message_type, message)
                 except UnknownMessage as e:
                     print("Client received unhandled message type:", message_type, message)
                     pass

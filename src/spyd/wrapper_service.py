@@ -18,6 +18,7 @@ from spyd.spyd_server import SpydServer
 ### TRACING ###
 from spyd.utils.tracing import trace_class
 from spyd.game.room.roles import BaseRole
+
 ### END TRACING ###
 
 

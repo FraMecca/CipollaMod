@@ -450,15 +450,6 @@ class Room(object):
         else:
             print("invalid change")
 
-    def _set_others_privilege(self, client, target, requested_privilege):
-        raise GenericError("Setting other player privileges isn't currently implemented.")
-
-    def _client_try_set_privilege(self, client, target, requested_privilege, pass_hash):
-        if client is target:
-            return self._set_self_privilege(client, requested_privilege, pass_hash)
-        else:
-            return self._set_others_privilege(client, target, requested_privilege)
-
     def _update_current_masters(self):
         self._broadcaster.current_masters(self.mastermode, self.clients)
 
@@ -475,28 +466,6 @@ class Room(object):
         elif requested_privilege == privileges.PRIV_ADMIN:
             self.admins.add(target)
         self._update_current_masters()
-
-    def _set_self_privilege(self, client, requested_privilege, password):
-        room_classification = "temporary" if self.temporary else "permanent"
-
-        if requested_privilege > privileges.PRIV_NONE:
-            privilege_action = "claim"
-            permission_involved = requested_privilege
-        else:
-            privilege_action = "relinquish"
-            permission_involved = client.privilege
-
-        functionality_category = Room.set_self_privilege_functionality_tree.get(room_classification, {}).get(privilege_action, {})
-
-        functionality = functionality_category.get(permission_involved, None)
-
-        if functionality is None:
-            raise InsufficientPermissions("You do not have permissions to do that.")
-
-        if client.allowed(functionality):
-            self._client_change_privilege(client, client, requested_privilege)
-        else:
-            raise InsufficientPermissions(functionality.denied_message)
 
     def get_target_client(self, target_pn):
         if target_pn.is_digit():
