@@ -68,6 +68,8 @@ class Room(object):
 
         self._broadcaster = RoomBroadcaster(self._clients, self._players)
 
+        self.await_map_mode_initialized()
+
         reactor.addSystemEventTrigger('before', 'flush_bindings', self._flush_messages)
 
 

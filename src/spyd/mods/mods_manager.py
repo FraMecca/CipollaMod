@@ -39,13 +39,11 @@ class ModsManager(metaclass=Singleton):
         spec.loader.exec_module(module)
         return module
 
-    @tracer
     def reload_python_file(self, mod_name):
         pymodule = self.module_map[mod_name]
         newmodule = self.load_pythonfile(pymodule.__file__)
         self.load_mod(getmembers(newmodule))
 
-    @tracer
     def enable(self, mod_name, room):
         modCls = self.mods[mod_name] # is a class, must be instantiated
         mod = modCls()
@@ -56,14 +54,12 @@ class ModsManager(metaclass=Singleton):
         else:
             return False
 
-    @tracer
     def disable(self, mod_name, room):
         if room.is_mod_active(mod_name):
             mod = room.get_mod(mod_name)
             mod.teardown(room)
             room.del_mod(mod)
 
-    @tracer
     def reload(self, mod_name, room):
         if room.is_mod_active(mod_name):
             mod = room.get_mod(mod_name)
@@ -72,6 +68,5 @@ class ModsManager(metaclass=Singleton):
         self.reload_python_file(mod_name)
         return self.enable(mod_name, room)
 
-    @tracer
     def list_mods(self):
         return tuple(self.mods.keys())

@@ -459,7 +459,6 @@ class BaseRole(object):
     def on_mapcrc(self, client, room, message):
         room.handle_client_event('map_crc', client, message['mapcrc'])
 
-    @tracer
     def on_mapvote(self, client, room, message):
         client.role.handle_event('map_vote', room, client, message['map_name'], message['mode_num'])
 
@@ -610,7 +609,6 @@ class MasterRole(BaseRole):
             'N_MASTERMODE': self.on_mastermode,
             })
 
-    @tracer
     def on_map_vote(self, room, client, map_name, mode_num):
         mode_name = get_mode_name_from_num(mode_num)
         map_name = resolve_map_name(room, map_name)

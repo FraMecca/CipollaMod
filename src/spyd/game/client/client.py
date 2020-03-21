@@ -125,7 +125,6 @@ class Client(object):
 
         self.connection_sequence_complete = True
 
-    @tracer
     def send_server_message(self, message):
         if message:
             with self.sendbuffer(1, True) as cds:
