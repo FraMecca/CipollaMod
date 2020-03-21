@@ -44,3 +44,11 @@ def validate_message_file(filename):
                         ['player_connect', 'player_disconnect', 'server_welcome', 'server_goodbye']))
     except:
         raise ConfigurationError(f'Invalid message file: {filename}.')
+
+def get_available_maps(package_dir):
+    def get(package_dir):
+        import glob
+        package_dir += 'base/' if package_dir == '/' else '/base/'
+        for path in glob.glob(package_dir+'*.ogz'):
+            yield path.split('/')[-1][:-4] # remove .ogz
+    return tuple(get(package_dir))
