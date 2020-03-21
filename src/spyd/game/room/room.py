@@ -28,7 +28,7 @@ class Room(object):
     * Accessors to query the state of the room.
     * Setters to modify the state of the room.
     '''
-    def __init__(self, room_name=None, map_meta_data_accessor=None):
+    def __init__(self, room_name=None, map_meta_data_accessor=None, defaultGameMode='ffa'):
         self._game_clock = GameClock()
         self._attach_game_clock_event_handlers()
 
@@ -62,7 +62,8 @@ class Room(object):
         self._player_event_handler = GameEventHandler()
 
         # map_rotation_data = test_rotation_dict # don't load this, load the one specified in config
-        map_rotation = MapRotation.from_dictionary(ConfigManager().get_rotation_dict())
+        gamemode = ConfigManager().maps.mode_indexes[defaultGameMode]
+        map_rotation = MapRotation.from_dictionary(ConfigManager().get_rotation_dict(), defaultMode=gamemode)
         self._map_mode_state = RoomMapModeState(self, map_rotation, map_meta_data_accessor, self._game_clock)
 
         self._broadcaster = RoomBroadcaster(self._clients, self._players)

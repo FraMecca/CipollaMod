@@ -8,6 +8,8 @@ class ConfigurationFileError(Exception): pass
 
 from spyd.utils.configuration_utils import *
 
+game_modes = ['ffa', 'insta', 'effic', 'coop', 'ctf', 'efficctf', 'instactf']
+
 class ConfigManager(metaclass=Singleton):
     def __init__(self, cfgfile):
         from configparser import ConfigParser
@@ -20,8 +22,9 @@ class ConfigManager(metaclass=Singleton):
             'public': asstr,
             'lan': asbool,
             'announce': asstr,
-            'resetwhenempty': asbool,
+            'resetwhenempty': asbool, # TODO: implement reset when empty
             'timeout': asint,
+            'gamemode': asstr,
             'maxclients': asint,
             'maxplayers': asint,
             'port': asint,
@@ -33,12 +36,12 @@ class ConfigManager(metaclass=Singleton):
         }
         sections = {
             'SERVER': { 'name': asstr, 'info': asstr, 'packages': asstr, 'shutdowncountdown': asint },
-            'MAPS': dict(zip(('coop', 'ctf', 'instactf', 'efficctf', 'effic', 'ffa', 'insta'), repeat(asjsonobj)))
+            'MAPS': dict(zip(game_modes, repeat(asjsonobj)))
         }
 
         # later, class attributes will become named tuples
         Server = namedtuple('Server', list(sections['SERVER'].keys()) + ['available_maps'])
-        Maps = namedtuple('Maps', sections['MAPS'].keys())
+        Maps = namedtuple('Maps', list(sections['MAPS'].keys()) + ['mode_indexes'])
         Room = namedtuple('Room', roomKeys.keys())
 
         # sanity checks
@@ -55,7 +58,6 @@ class ConfigManager(metaclass=Singleton):
                 def to_tuple(key):
                     return key, validators[key](key, cfg[section][key])
                 setattr(self, section.lower(), dict(map(to_tuple, section_keys)))
-        
         possible_rooms = list(filter(lambda s: s not in set(sections.keys()), cfg.sections()))
         for room in possible_rooms:
             if missing_keys(roomKeys.keys(), cfg[room].keys()):
@@ -69,6 +71,9 @@ class ConfigManager(metaclass=Singleton):
                 self.rooms[room] = dict(map(to_tuple, cfg[room].items()))
 
             self.rooms[room]['messages'] = validate_message_file(self.rooms[room]['messages'])
+            if self.rooms[room]['gamemode'] not in game_modes:
+                msg = f"Invalid gamemode. Possible choices: {','.join(game_modes)}."
+                raise ConfigurationError(msg)
 
             # check master url is fine
             announce = self.rooms[room]['announce']
@@ -86,7 +91,8 @@ class ConfigManager(metaclass=Singleton):
             self.rooms[rname] = Room(*room.values())
         self.server = Server(*self.server.values(),
                              available_maps=get_available_maps(self.server['packages']))
-        self.maps = Maps(*self.maps.values())
+        self.maps = Maps(*self.maps.values(),
+                         mode_indexes=dict(map(lambda r: (r[1], r[0]), enumerate(game_modes))))
 
     def get_rotation_dict(self):
         return {
@@ -99,7 +105,7 @@ class ConfigManager(metaclass=Singleton):
                 'ctf': self.maps.ctf,
                 'efficctf': self.maps.efficctf,
             },
-            'modes': ['insta', 'ffa', 'effic', 'coop', 'ctf', 'efficctf', 'instactf']
+            'modes': game_modes
         }
 
 def get_available_maps(package_dir):

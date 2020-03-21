@@ -69,8 +69,10 @@ class SpydServer(object):
             maxclients = roomCfg.maxclients
             maxdown = roomCfg.maxdown
             maxup = roomCfg.maxup
+            gamemode = roomCfg.gamemode
             room = Room(room_name=rname,
-                        map_meta_data_accessor=self.map_meta_data_accessor)
+                        map_meta_data_accessor=self.map_meta_data_accessor,
+                        defaultGameMode=gamemode)
             if roomCfg.public:
                 # port is the port of the room that needs to be registered in the master server
                 master_url = roomCfg.announce[0]

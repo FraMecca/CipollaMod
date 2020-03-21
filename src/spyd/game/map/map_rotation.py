@@ -11,23 +11,26 @@ test_rotation_dict = {
 
 class MapRotation(object):
     @staticmethod
-    def from_dictionary(dictionary):
-        return MapRotation(dictionary['rotations'],
-                           dictionary['modes'],
-                           dictionary.get('rotate_modes', False),
-                           dictionary.get('rotate_on_first_player', False))
+    def from_dictionary(dictionary, defaultMode=0):
+        mr = MapRotation(dictionary['rotations'],
+                         dictionary['modes'],
+                         dictionary.get('rotate_modes', False),
+                         dictionary.get('rotate_on_first_player', False))
+        mr.mode_index = defaultMode
+        return mr
         
     @staticmethod
     def from_test_data():
         return MapRotation.from_dictionary(test_rotation_dict)
     
     def __init__(self, map_rotation_dict, mode_rotation_list, rotate_modes=False, rotate_on_first_player=False):
+        # TODO: implement mode_rotate
         self.map_rotation_dict = map_rotation_dict
         self.mode_rotation_list = mode_rotation_list
         self.rotate_modes = rotate_modes
         self.rotate_on_first_player = rotate_on_first_player
         
-        self.mode_index = 0
+        self.mode_index = 6
         self.map_index = -1
     
     def next_map_mode(self, peek):
