@@ -1,11 +1,25 @@
-spyd
+CipollaMod
 ====
 
-[![Build Status](https://travis-ci.org/fdChasm/spyd.png?branch=master)](https://travis-ci.org/fdChasm/spyd)
-[![Coverage Status](https://coveralls.io/repos/fdChasm/spyd/badge.png?branch=master)](https://coveralls.io/r/fdChasm/spyd?branch=master)
+This is a fork a pure python server implementation of the Sauerbraten Cube 2 Server.
+It is forked from [Spyd](https://github.com/fdChasm/spyd/). See the [License](LICENSE) file.
 
-A pure Python implementation of the Sauerbraten Cube 2 server using Twisted
+# Aim of the project
+The aim of this mod is to build an easy to customize server that may serve as a base for future Sauerbraten modders.
+It implements a mod engine with hot reload and access to the whole server API.
 
-* [Get Started](https://github.com/fdChasm/spyd/wiki/How-to-install-and-run-Spyd)
-* [Dependencies](https://github.com/fdChasm/spyd/wiki/Dependencies)
-* [License](LICENSE)
+# Roadmap
+
+These are the next steps that needs to be completed in any order.
+
+- teamkill ctf no flag
+- spectate others when master and deny unspectate
+- no locked with 0 players
+- map voting mod
+- irc bot
+- #duel command
+- stallman bot
+- banip and banplayer commands on command mod
+- documentation
+- end of the game stats: DeadEye, LoneWolf, Pursuer, FragsMonger, Champion, rugby?
+- database of players
