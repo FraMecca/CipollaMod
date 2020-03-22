@@ -1,12 +1,12 @@
 CipollaMod
 ====
 
-This is a fork a pure python server implementation of the Sauerbraten Cube 2 Server.
+This is a modded implementation of the Sauerbraten Cube 2 Server.
 It is forked from [Spyd](https://github.com/fdChasm/spyd/). See the [License](LICENSE) file.
 
 # Aim of the project
 The aim of this mod is to build an easy to customize server that may serve as a base for future Sauerbraten modders.
-It implements a mod engine with hot reload and access to the whole server API.
+It implements a mod engine with hot reload and access to the whole server API. Mods can be written in Python
 
 # Roadmap
 
