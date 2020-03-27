@@ -42,9 +42,9 @@ class RoomBroadcaster(object):
         with self.broadcastbuffer(1, True, [player]) as cds:
             swh.put_explodefx(cds, player, gun, explode_id)
 
-    def player_died(self, player, killer):
+    def player_died(self, player, killer, teams):
         with self.broadcastbuffer(1, True) as cds:
-            swh.put_died(cds, player, killer)
+            swh.put_died(cds, player, killer, teams)
 
     def player_disconnected(self, player):
         with self.broadcastbuffer(1, True) as cds:

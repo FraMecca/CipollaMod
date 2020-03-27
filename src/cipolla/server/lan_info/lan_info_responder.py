@@ -102,7 +102,7 @@ class LanInfoResponder(object):
         cds.putint(player.pn)
         cds.putint(player.ping)
         cds.putstring(player.name)
-        cds.putstring(player.team_name)
+        cds.putstring(player.teamname)
         cds.putint(player.state.frags)
         cds.putint(player.state.flags)
         cds.putint(player.state.deaths)

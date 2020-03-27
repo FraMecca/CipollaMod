@@ -6,12 +6,3 @@ class Team(object):
         self.score = 0
         self.oflags = 0
         self.frags = 0
-
-class NullTeam(object):
-    def __init__(self):
-        self.id = -1
-        self.name = ''
-
-        self.score = 0
-        self.oflags = 0
-        self.frags = 0

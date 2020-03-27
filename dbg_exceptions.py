@@ -1,6 +1,6 @@
 from pickle import load
 
-fname = 'src/spyd/data/tracing.pickle'
+fname = 'src/cipolla/data/tracing.pickle'
 
 exceptions = []
 with open(fname, 'rb') as fp:

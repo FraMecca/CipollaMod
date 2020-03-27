@@ -18,9 +18,13 @@ from cipolla.cipolla_server import CipollaServer
 ### TRACING ###
 from cipolla.utils.tracing import trace_class
 from cipolla.game.room.roles import BaseRole
+from cipolla.game.room.roles import AdminRole
 from cipolla.game.room.room_map_mode_state import RoomMapModeState
 from cipolla.game.timing.game_clock import GameClock
 from cipolla.mods.mods_manager import ModsManager
+from cipolla.game.gamemode.bases.mode_base import ModeBase
+from cipolla.game.gamemode.bases.ctf_base import CtfBase
+from cipolla.game.room.room import Room
 
 ### END TRACING ###
 

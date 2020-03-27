@@ -14,6 +14,7 @@ from cipolla.game.room.room_map_mode_state import RoomMapModeState
 from cipolla.game.room.roles import AdminRole, MasterRole, BaseRole
 from cipolla.game.map.map_rotation import MapRotation, test_rotation_dict
 from cipolla.game.server_message_formatter import smf, format_cfg_message
+from cipolla.game.map.team import Team
 from cipolla.game.timing.game_clock import GameClock
 from cipolla.config_manager import ConfigManager
 from cipolla.protocol import swh
@@ -119,17 +120,20 @@ class Room(object):
 
     @property
     def teams_size(self):
-        from cipolla.game.gamemode.bases.teamplay_base import base_teams
-        teams = {team.name: (len(players), team, players) for team, players in self._players.by_team().items()}
+        teams = {team.name: (len(players), team, players) for team, players in self._players.by_team(self.gamemode.teams).items()}
 
         # add base teams
-        if 'good' not in teams:
-            teams['good'] = (0, base_teams['good'], [])
+        if 'good' not in teams.keys():
+            teams['good'] = (0, Team(0, 'good'), [])
         if 'evil' not in teams:
-            teams['evil'] = (0, base_teams['evil'], [])
+            teams['evil'] = (0, Team(0, 'evil'), [])
 
         return teams
 
+    @property
+    def teams(self):
+        assert self.is_teammode
+        return self.gamemode.teams
 
     @property
     def playing_count(self):

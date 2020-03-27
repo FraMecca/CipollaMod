@@ -44,6 +44,7 @@ class ModeBase(object):
         self.room = room
         self._broadcaster = room._broadcaster
         self._game_clock = room._game_clock
+        self.teams = None
     
     
     def initialize(self):
@@ -118,18 +119,18 @@ class ModeBase(object):
                 target.state.deaths += 1
                 if player == target:
                     player.state.suicides += 1
-                if self.hasteams and player.team == target.team:
+                if self.hasteams and player.teamname == target.teamname:
                     player.state.teamkills += 1
-                if player == target or self.hasteams and player.team == target.team:
+                if player == target or self.hasteams and player.teamname == target.teamname:
                     mod = -1
                 else:
                     mod = 1
 
                 player.state.frags += mod
-                if self.hasteams:
-                    player.team.frags += mod
+                if self.hasteams and player.teamname != '':
+                    self.teams[player.teamname].frags += mod
 
-                swh.put_died(cds, target, player)
+                swh.put_died(cds, target, player, self.teams)
                 self.on_player_death(target, player)
 
                

@@ -91,7 +91,7 @@ class swh(object):
     def put_setteam(data_stream, client, reason):
         data_stream.putint(message_types.N_SETTEAM)
         data_stream.putint(client.cn)
-        data_stream.putstring(client.team.name)
+        data_stream.putstring(client.teamname)
         data_stream.putint(reason)
 
     @staticmethod
@@ -110,7 +110,7 @@ class swh(object):
         data_stream.putint(message_types.N_INITCLIENT)
         data_stream.putint(client.cn)
         data_stream.putstring(client.name)
-        data_stream.putstring(client.team.name if client.team is not None else "")
+        data_stream.putstring(client.teamname)
         data_stream.putint(client.playermodel)
 
     @staticmethod
@@ -213,7 +213,7 @@ class swh(object):
         data_stream.putint(flag.drop_location.z)
 
     @staticmethod
-    def put_scoreflag(data_stream, client, relayflag, goalflag):
+    def put_scoreflag(data_stream, client, team, relayflag, goalflag):
         data_stream.putint(message_types.N_SCOREFLAG)
         data_stream.putint(client.cn)
         data_stream.putint(relayflag.id)
@@ -221,8 +221,8 @@ class swh(object):
         data_stream.putint(goalflag.id)
         data_stream.putint(goalflag.version)
         data_stream.putint(goalflag.spawn)
-        data_stream.putint(client.team.id + 1)
-        data_stream.putint(client.team.score)
+        data_stream.putint(team.id + 1)
+        data_stream.putint(team.score)
         data_stream.putint(client.state.flags)
 
     @staticmethod
@@ -302,13 +302,13 @@ class swh(object):
         data_stream.putint(client.cn)
 
     @staticmethod
-    def put_died(data_stream, client, killer):
+    def put_died(data_stream, client, killer, teams):
         data_stream.putint(message_types.N_DIED)
         data_stream.putint(client.cn)
         data_stream.putint(killer.cn)
         data_stream.putint(killer.state.frags)
-        if killer.team is not None:
-            data_stream.putint(killer.team.frags)
+        if killer.teamname != "":
+            data_stream.putint(teams[killer.teamname].frags)
         else:
             data_stream.putint(0)
 

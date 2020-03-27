@@ -19,15 +19,16 @@ class PlayerCollection(object):
     def to_iterator(self):
         return iter(self._players.values())
 
-    def by_team(self):
+    def by_team(self, allteams):
         from itertools import groupby
         from cipolla.utils.groupby_utils import unroll_group
 
-        team_of = lambda p: p.team
+        team_of = lambda p: allteams[p.teamname]
 
         return dict(map(unroll_group,
-                        groupby(sorted(self.to_iterator(),
-                                       key=lambda p: team_of(p).name),
+                        groupby(sorted(filter(lambda p: p.teamname != '',
+                                              self.to_iterator()),
+                                       key=lambda p: p.teamname),
                                 key=team_of)))
 
     def by_pn(self, pn):

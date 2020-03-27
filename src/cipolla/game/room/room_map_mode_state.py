@@ -94,6 +94,7 @@ class RoomMapModeState(object):
         defer.returnValue(map_meta_data)
 
     def _new_map_mode_initialize(self):
+        print(self.gamemode, type(self.gamemode))
         with self.room.broadcastbuffer(1, True) as cds:
             swh.put_mapchange(cds, self.map_name, self.gamemode.clientmodenum, hasitems=False)
 
@@ -110,6 +111,7 @@ class RoomMapModeState(object):
         for player in self.room.players:
             player.state.map_change_reset()
             player.state.respawn()
+            player._team = ""
             self.gamemode.spawn_loadout(player)
 
         for client in self.room.clients:

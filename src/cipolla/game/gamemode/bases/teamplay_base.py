@@ -29,9 +29,9 @@ class TeamplayBase(ModeBase):
         possible_teams = self.room.teams_size
         if len(possible_teams) > 0:
             smallest_team = min(possible_teams.values(), key=fst)
-            player.team = snd(smallest_team)
+            player._team = snd(smallest_team).name
         else:
-            player.team = random_choice(tuple(base_teams.values()))
+            player._team = random_choice(tuple(base_teams.values())).name
         super().initialize_player(cds, player)
         swh.put_setteam(cds, player, -1)
         swh.put_teaminfo(cds, self.teams.values())
@@ -41,15 +41,15 @@ class TeamplayBase(ModeBase):
 
     def on_player_disconnected(self, player):
         super().on_player_disconnected(player)
-        if player.team is not None:
-            player.team = None
+        if player.teamname:
+            player.team = ""
 
     def on_player_try_set_team(self, player, target, old_team_name, new_team_name):
+        if new_team_name == "": return
         super().on_player_try_set_team(player, target, old_team_name, new_team_name)
         team = self._get_team(new_team_name)
         if team is None: return
-
-        if team is target.team: return
+        if team.name is target.teamname: return
 
         self._teamswitch_suicide(target)
         with self.room.broadcastbuffer(1, True) as cds:
@@ -59,18 +59,18 @@ class TeamplayBase(ModeBase):
                 reason = 0
             else:
                 reason = 1
-            target.team = team
+            target.teamname = team.name
             swh.put_setteam(cds, target, reason)
 
     def on_player_death(self, player, killer):
         super().on_player_death(player, killer)
         if player is killer:
-            player.team.frags -= 1
+            self.teams[player.teamname].frags -= 1
 
     def _teamswitch_suicide(self, player):
         super()._teamswitch_suicide(player)
         if not player.state.is_alive: return
         player.state.suicide()
         with self.room.broadcastbuffer(1, True) as cds:
-            swh.put_died(cds, player, player)
+            swh.put_died(cds, player, player, self.teams)
         self.on_player_death(player, player)

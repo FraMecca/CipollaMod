@@ -1,6 +1,5 @@
 import uuid
 
-from cipolla.game.map.team import NullTeam
 from cipolla.game.player.player_state import PlayerState
 from cipolla.game.server_message_formatter import smf
 from cipolla.protocol import swh
@@ -15,7 +14,7 @@ class Player(object):
         self._pn = playernum
         self.name = ''.join(name)
         self.playermodel = playermodel
-        self._team = NullTeam()
+        self._team = ""
         self._isai = False
         self._uuid = str(uuid.uuid4())
 
@@ -57,16 +56,12 @@ class Player(object):
         return self.client.room
 
     @property
-    def team(self):
+    def teamname(self):
         return self._team
 
-    @team.setter
-    def team(self, team):
-        self._team = team or NullTeam()
-
-    @property
-    def team_name(self):
-        return self.team.name
+    @teamname.setter
+    def teamname(self, team):
+        self._team = team or ""
 
     @property
     def shares_name(self):

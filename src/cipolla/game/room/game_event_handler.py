@@ -119,7 +119,7 @@ class GameEventHandler(object):
     def on_suicide(self, room, player):
         player.state.state = client_states.CS_DEAD
         room.gamemode.on_player_death(player, player)
-        room._broadcaster.player_died(player, player)
+        room._broadcaster.player_died(player, player, room.teams if room.is_teammode else None)
 
     def on_try_drop_flag(self, room, player):
         room.gamemode.on_player_try_drop_flag(player)
@@ -135,7 +135,7 @@ class GameEventHandler(object):
         room.gamemode.on_player_shoot(player, shot_id, gun, from_pos, to_pos, hits)
 
     def on_switch_team(self, room, player, team_name):
-        room.gamemode.on_player_try_set_team(player, player, player.team.name, team_name)
+        room.gamemode.on_player_try_set_team(player, player, player.teamname, team_name)
 
     def on_edit_mode(self, room, player, editmode):
         with room.broadcastbuffer(1, True, [player]) as cds:

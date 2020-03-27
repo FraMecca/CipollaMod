@@ -34,7 +34,7 @@ class InstaCtfRugby(InstaCtf):
         if target is None: return
 
         ownsflag, flag = self.owns_flag(player)
-        if ownsflag and target.team is player.team:
+        if ownsflag and target.teamname == player.teamname:
             flag.owner = target
             with self.room.broadcastbuffer(1, True) as cds:
                 swh.put_takeflag(cds, target, flag)

@@ -1,6 +1,6 @@
 class Flag(object):
     id = 0
-    team = None
+    teamname = ""
     version = 0
     spawn = -1
     invisible = 0
@@ -10,10 +10,10 @@ class Flag(object):
     drop_location = None
     drop_time = None
     
-    def __init__(self, game_clock, fid, spawn_loc, team):
+    def __init__(self, game_clock, fid, spawn_loc, teamname):
         self.game_clock = game_clock
         self.id = fid
-        self.team = team
+        self.teamname = teamname
         self.return_scheduled_callback_wrapper = None
 
     def reset(self):
