@@ -7,7 +7,6 @@ from cipolla.game.map.map_rotation import MapRotation
 from cipolla.game.room.ready_up_controllers import NoOpReadyUpController
 from cipolla.protocol import swh
 
-
 class RoomMapModeState(object):
     def __init__(self, room, map_rotation=None, map_meta_data_accessor=None, game_clock=None):
         self.room = room

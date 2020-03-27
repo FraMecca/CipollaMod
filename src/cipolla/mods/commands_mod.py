@@ -5,6 +5,10 @@ from cipolla.mods.abstract_mod import AbstractMod
 from cipolla.mods.mods_manager import ModsManager
 from cipolla.game.server_message_formatter import *
 
+from cipolla.utils.tracing import tracer
+
+#TODO: functions return true or false
+# log.error the real reason
 
 class CommandsMod(AbstractMod):
     canLoad = True # specify that mod can be loaded at runtime
@@ -86,11 +90,16 @@ class CommandsMod(AbstractMod):
                 player.client.send_server_message(info(f'mod [{mod_name}] {action}'))
             elif action == 'list':
                 mods_list = mod_actions[action](mod_name, room)
-                message = ' | '.join(map(orange, mods_list))
+                on = green('on')
+                off = red('off')
+                is_active = lambda m: f'{m}: {on if room.is_mod_active(m) else off}'
+                message = ' | '.join(map(orange,
+                                         map(is_active, mods_list)))
                 player.client.send_server_message(info('Mods available:'))
                 player.client.send_server_message(message)
             else:
                 player.client.send_server_message(usage_error(f'mod [{mod_name}] does not exist'))
+                player.client.send_server_message(usage_error('or generic error.'))
 
     def auth(self, room, player, args):
         passw = args
@@ -198,9 +207,8 @@ class CommandsMod(AbstractMod):
 class Mod:
     @staticmethod
     def on(mod_name, room):
-        if room.is_mod_active(mod_name):
-            return False
-        ModsManager().enable(mod_name, room)
+        if not room.is_mod_active(mod_name):
+            ModsManager().enable(mod_name, room)
         return True
 
     @staticmethod
@@ -212,10 +220,8 @@ class Mod:
 
     @staticmethod
     def reload(mod_name, room):
-        if not room.is_mod_active(mod_name):
-            return False
-        ModsManager().reload(mod_name, room)
-        return True
+        # always reload and activate
+        return ModsManager().reload(mod_name, room)
 
     @staticmethod
     def list(*args, **kwargs):

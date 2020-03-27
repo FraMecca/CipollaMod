@@ -64,6 +64,7 @@ class ModsManager(metaclass=Singleton):
         if room.is_mod_active(mod_name):
             mod = room.get_mod(mod_name)
             mod.teardown(room)
+            room.del_mod(mod)
 
         self.reload_python_file(mod_name)
         return self.enable(mod_name, room)

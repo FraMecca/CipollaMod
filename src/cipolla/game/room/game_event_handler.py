@@ -164,5 +164,3 @@ class GameEventHandler(object):
 
     def on_game_chat(self, room, player, text):
         swh.put_text(player.state.messages, text)
-
-from cipolla.utils.tracing import trace_class; trace_class(GameEventHandler)

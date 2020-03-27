@@ -132,7 +132,7 @@ class ModeBase(object):
                 swh.put_died(cds, target, player)
                 self.on_player_death(target, player)
 
-                
+               
     def on_player_hit(self, player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz):
         target = self.room.get_player(target_cn)
         if target is None: return

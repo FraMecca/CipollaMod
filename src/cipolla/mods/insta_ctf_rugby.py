@@ -1,11 +1,11 @@
 from cube2common.constants import armor_types, weapon_types
+from cipolla.game.gamemode.gamemodes import gamemodes
 from cipolla.game.gamemode.insta_ctf import InstaCtf
 from cipolla.game.server_message_formatter import red, yellow
 from cipolla.protocol import swh
 from cipolla.mods.abstract_mod import AbstractMod
 
-
-class InstaCtfRugby(AbstractMod):
+class InstaCtfRugbyMod(AbstractMod):
     name = "rugby"
     canLoad = True
 
@@ -13,21 +13,31 @@ class InstaCtfRugby(AbstractMod):
         return isinstance(room.gamemode, InstaCtf)
 
     def setup(self, room):
-        mode = room.gamemode
-        method_name = 'on_player_hit'
+        for name, mode in gamemodes.items():
+            print(name, mode, name == 'instactf')
+            if name == 'instactf':
+                gamemodes['instactf'] = InstaCtfRugby
+                return
+        # TODO log error
+        assert False, "No instactf???"
 
-        self.original_method = getattr(mode, method_name)
-        self.room = room
-        self.owns_flag = getattr(mode, 'owns_flag')
+    def teardown(self, room):
+        for name, mode in gamemodes.items():
+            if name == 'instactf':
+                gamemodes['instactf'] = InstaCtf
+        # TODO log error
+        assert False, "No instactfrugby???"
 
-        self.old_methods = [(mode, method_name, self.original_method)]
-        setattr(mode, 'on_player_hit', self.on_player_hit)
 
+class InstaCtfRugby(InstaCtf):
     def on_player_hit(self, player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz):
         target = self.room.get_player(target_cn)
         if target is None: return
 
         ownsflag, flag = self.owns_flag(player)
+        print('-----------------')
+        print(ownsflag , target.team is player.team)
+        print('-----------------')
         if ownsflag and target.team is player.team:
             flag.owner = target
             with self.room.broadcastbuffer(1, True) as cds:
@@ -36,4 +46,6 @@ class InstaCtfRugby(AbstractMod):
             self.room.server_message(f'{yellow(player.name)} passed the flag to ' +
                         f'{yellow(target.name)}: {red(float(distance)/100)} ogro feet')
         else:
-            self.original_method(player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz)
+            # self.original_method(player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz)
+            super().on_player_hit(player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz)
+    
