@@ -85,9 +85,11 @@ class CipollaServer(object):
             self.lan_info_service.add_lan_info_for_room(room, interface, port)
 
             #TODO better validation of room
-            for mod_name in roomCfg.mods_enabled.split(','):
-                if mod_name != '""' and ModsManager().enable(mod_name, room):
-                    print('enabled mod: ' + mod_name)
+            for mod_name in filter(lambda s: s != '""', roomCfg.mods_enabled.split(',')):
+                if ModsManager().enable(mod_name, room):
+                    logger.info('enabled mod: ' + mod_name)
+                else:
+                    logger.warning("Can't enable: "+mod_name)
 
     def _before_shutdown(self, config):
         shutdown_countdown = ConfigManager().server.shutdowncountdown

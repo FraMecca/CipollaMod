@@ -10,11 +10,10 @@ class InstaCtfRugbyMod(AbstractMod):
     canLoad = True
 
     def can_attach(self, room):
-        return isinstance(room.gamemode, InstaCtf)
+        return True
 
     def setup(self, room):
         for name, mode in gamemodes.items():
-            print(name, mode, name == 'instactf')
             if name == 'instactf':
                 gamemodes['instactf'] = InstaCtfRugby
                 return
@@ -35,9 +34,6 @@ class InstaCtfRugby(InstaCtf):
         if target is None: return
 
         ownsflag, flag = self.owns_flag(player)
-        print('-----------------')
-        print(ownsflag , target.team is player.team)
-        print('-----------------')
         if ownsflag and target.team is player.team:
             flag.owner = target
             with self.room.broadcastbuffer(1, True) as cds:
@@ -46,6 +42,5 @@ class InstaCtfRugby(InstaCtf):
             self.room.server_message(f'{yellow(player.name)} passed the flag to ' +
                         f'{yellow(target.name)}: {red(float(distance)/100)} ogro feet')
         else:
-            # self.original_method(player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz)
             super().on_player_hit(player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz)
     

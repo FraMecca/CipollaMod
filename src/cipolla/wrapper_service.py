@@ -21,7 +21,6 @@ from cipolla.game.room.roles import BaseRole
 from cipolla.game.room.room_map_mode_state import RoomMapModeState
 from cipolla.game.timing.game_clock import GameClock
 from cipolla.mods.mods_manager import ModsManager
-trace_class(ModsManager)
 
 ### END TRACING ###
 
