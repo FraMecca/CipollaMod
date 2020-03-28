@@ -94,7 +94,6 @@ class RoomMapModeState(object):
         defer.returnValue(map_meta_data)
 
     def _new_map_mode_initialize(self):
-        print(self.gamemode, type(self.gamemode))
         with self.room.broadcastbuffer(1, True) as cds:
             swh.put_mapchange(cds, self.map_name, self.gamemode.clientmodenum, hasitems=False)
 
@@ -114,6 +113,9 @@ class RoomMapModeState(object):
             player._team = ""
             self.gamemode.spawn_loadout(player)
 
+        if self.room.is_teammode:
+            self.init_teams()
+
         for client in self.room.clients:
             with client.sendbuffer(1, True) as cds:
 
@@ -126,3 +128,24 @@ class RoomMapModeState(object):
                 for player in client.player_iter():
                     if not player.state.is_spectator:
                         swh.put_spawnstate(cds, player)
+
+    def init_teams(self):
+        from random import randint
+        from itertools import chain
+        from math import floor, ceil
+
+        allplayers = list(self.room.players)
+        nplayers = len(allplayers)
+        decreasing_list = list(range(nplayers))
+
+        to_int = (ceil, floor)[randint(0, 1)]
+        for i in range(to_int(nplayers/2)):
+            idx = randint(0, len(decreasing_list)-1)
+            choice = decreasing_list.pop(idx)
+            allplayers[choice]._team = 'evil'
+
+        # rest
+        for i in decreasing_list:
+            allplayers[i]._team = 'good'
+        for player in self.room.players:
+            self.room.gamemode.on_player_try_set_team(player, player, player.teamname, player.teamname)
