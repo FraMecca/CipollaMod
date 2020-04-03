@@ -1,6 +1,8 @@
 from cube2common.constants import PROTOCOL_VERSION, message_types, weapon_types, privileges
 from cipolla.utils.formatted_sauerbraten_message_splitter import FormattedSauerbratenMessageSplitter
 
+from cipolla.utils.tracing import tracer
+
 class swh(object):
     @staticmethod
     def put_info_reply(cds, server_desc, numclients, maxclients, mode_num, map_name, seconds_left, mastermask, gamepaused, gamespeed):
@@ -91,7 +93,7 @@ class swh(object):
     def put_setteam(data_stream, client, reason):
         data_stream.putint(message_types.N_SETTEAM)
         data_stream.putint(client.cn)
-        data_stream.putstring(client.teamname)
+        data_stream.putstring(client._team)
         data_stream.putint(reason)
 
     @staticmethod
@@ -110,7 +112,7 @@ class swh(object):
         data_stream.putint(message_types.N_INITCLIENT)
         data_stream.putint(client.cn)
         data_stream.putstring(client.name)
-        data_stream.putstring(client.teamname)
+        data_stream.putstring(client._team)
         data_stream.putint(client.playermodel)
 
     @staticmethod
@@ -136,6 +138,7 @@ class swh(object):
             data_stream.putint(ammo_slot)
 
     @staticmethod
+    @tracer
     def put_resume(data_stream, players):
         data_stream.putint(message_types.N_RESUME)
         for player in players:
@@ -307,8 +310,8 @@ class swh(object):
         data_stream.putint(client.cn)
         data_stream.putint(killer.cn)
         data_stream.putint(killer.state.frags)
-        if killer.teamname != "":
-            data_stream.putint(teams[killer.teamname].frags)
+        if killer._team != "":
+            data_stream.putint(teams[killer._team].frags)
         else:
             data_stream.putint(0)
 

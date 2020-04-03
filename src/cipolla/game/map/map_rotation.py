@@ -1,4 +1,4 @@
-
+from typing import Dict, List, Tuple, Union
 test_rotation_dict = {
     'rotations': {
                   'instactf': ['forge', 'dust2'],
@@ -11,11 +11,10 @@ test_rotation_dict = {
 
 class MapRotation(object):
     @staticmethod
-    def from_dictionary(dictionary, defaultMode=0):
-        mr = MapRotation(dictionary['rotations'],
-                         dictionary['modes'],
-                         dictionary.get('rotate_modes', False),
-                         dictionary.get('rotate_on_first_player', False))
+    def from_dictionary(rotations: Dict[str, List[str]],
+                        modes: List[str],
+                        defaultMode: int = 0):
+        mr = MapRotation(rotations, modes)
         mr.mode_index = defaultMode
         return mr
        
@@ -23,7 +22,10 @@ class MapRotation(object):
     def from_test_data():
         return MapRotation.from_dictionary(test_rotation_dict)
    
-    def __init__(self, map_rotation_dict, mode_rotation_list, rotate_modes=False, rotate_on_first_player=False):
+    def __init__(self, map_rotation_dict: Dict[str, List[str]],
+                 mode_rotation_list: List[str],
+                 rotate_modes: bool = False,
+                 rotate_on_first_player: bool = False) -> None:
         # TODO: implement mode_rotate
         self.map_rotation_dict = map_rotation_dict
         self.mode_rotation_list = mode_rotation_list
@@ -33,7 +35,7 @@ class MapRotation(object):
         self.mode_index = 6
         self.map_index = -1
    
-    def next_map_mode(self, peek):
+    def next_map_mode(self, peek: bool) -> Tuple[str, str]:
         this_mode_name = self.mode_rotation_list[self.mode_index]
         this_mode_maps = self.map_rotation_dict[this_mode_name]
         map_index = self.map_index + 1

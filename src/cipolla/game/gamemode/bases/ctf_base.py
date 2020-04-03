@@ -10,62 +10,62 @@ from cipolla.utils.tracing import tracer
 
 class CtfBase(TeamplayBase):
     def __init__(self, room, map_meta_data):
-        
+
         self.teams = {'good': Team(0, 'good'), 'evil': Team(1, 'evil')}
         super().__init__(room, map_meta_data, self.teams)
 
         self.room = room
         self._game_clock = room._game_clock
-        
-        
+
+
         self.flags = None
 
         self.scores = [0, 0]
-        
+
         if map_meta_data is not None:
             flag_list = []
             for ent in map_meta_data.get('ents', []):
                 if ent['type'] == game_entity_types.FLAG:
                     flag_list.append({'x': int(ent['x']*DMF), 'y': int(ent['y']*DMF), 'z': int(ent['z']*DMF), 'team': ent['attrs'][1]})
-    
+
             self._load_flag_list(flag_list)
 
     @property
     def got_flags(self):
         return self.flags is not None
-    
+
     def on_player_connected(self, player):
         super().on_player_connected(player)
         if not player.isai:
             with player.sendbuffer(1, True) as cds:
                 swh.put_initflags(cds, self.scores, self.flags or ())
-    
+
     def on_player_disconnected(self, player):
         super().on_player_disconnected(player)
         self.on_player_try_drop_flag(player)
-        if player.team is not None:
-            player.team = None
-        
+        if player._team is not None:
+            player._team = None
+
     def _get_team(self, name):
         return self.teams.get(name, None)
-        
+
     def _score_flag(self, player, goal_flag, relay_flag):
         self.scores[goal_flag.id] += 1
-        team = self.teams[player.teamname]
+        team = self.teams[player._team]
         print(team.score)
         team.score += 1
-        
+
         relay_flag.version += 1
         relay_flag.reset()
-        
+
         player.state.flags += 1
-        
+
         with self.room.broadcastbuffer(1, True) as cds:
             swh.put_scoreflag(cds, player, team, relay_flag, goal_flag)
-            
+
         if team.score >= 10:
             self.room.end_match()
-            
+
     def _reset_flag(self, flag):
         if flag.owner is not None: return
         flag.version += 1
@@ -73,16 +73,16 @@ class CtfBase(TeamplayBase):
         team = self.teams[flag.teamname]
         with self.room.broadcastbuffer(1, True) as cds:
             swh.put_resetflag(cds, flag, team)
-            
+
     def _return_flag(self, player, flag):
         flag.version += 1
         flag.reset()
-        
+
         player.state.flag_returns += 1
-        
+
         with self.room.broadcastbuffer(1, True) as cds:
             swh.put_returnflag(cds, player, flag)
-            
+
     def get_flag(self, flag_index):
         for flag in self.flags or ():
             if flag.id == flag_index:
@@ -93,22 +93,22 @@ class CtfBase(TeamplayBase):
         super().on_player_take_flag(player, flag_index, version)
         if player.state.is_spectator: return
         if not player.state.is_alive: return
-        
+
         if self.flags is None:
             return
-        
+
         if flag_index < 0 or flag_index >= len(self.flags):
             return
-            
+
         flag = self.get_flag(flag_index)
-        
+
         if flag.owner is not None:
             return
-            
+
         if flag.version != version:
             return
 
-        if flag.teamname == player.teamname:
+        if flag.teamname == player._team:
             if flag.dropped:
                 self._return_flag(player, flag)
                 return
@@ -118,20 +118,20 @@ class CtfBase(TeamplayBase):
                     self._score_flag(player, flag, other_flag)
                     break
             return
-            
+
         # Implement 1 drop and pickup rule
         if flag.dropper is player and flag.drop_count >= 2:
             return
-        
+
         flag.version += 1
         flag.owner = player
         flag.drop_time = None
-            
+
         with self.room.broadcastbuffer(1, True) as cds:
             swh.put_takeflag(cds, player, flag)
-        
+
         return True
-    
+
     def on_player_try_drop_flag(self, player):
         super().on_player_try_drop_flag(player)
         for flag in self.flags or ():
@@ -147,11 +147,11 @@ class CtfBase(TeamplayBase):
             if flag.owner is player:
                 return True, flag
         return False, None
-        
+
     def on_player_death(self, player, killer):
         self.on_player_try_drop_flag(player)
         super().on_player_death(player, killer)
-        
+
     def _teamswitch_suicide(self, player):
         super()._teamswitch_suicide(player)
         if not player.state.is_alive: return
@@ -162,12 +162,12 @@ class CtfBase(TeamplayBase):
 
     def on_client_flag_list(self, player, flag_list):
         return self.on_player_flag_list(player, flag_list)
-    
+
     def on_player_flag_list(self, player, flag_list):
         super().on_player_flag_list(player, flag_list)
         if not self.got_flags:
             self._load_flag_list(flag_list)
-    
+
     def _load_flag_list(self, flag_list):
         fid = 0
         self.flags = []
@@ -183,9 +183,8 @@ class CtfBase(TeamplayBase):
         super().on_player_try_set_team(player, target, old_team_name, new_team_name)
         team = self._get_team(new_team_name)
         if team is None: return
-        
-        if team == target.teamname: return
-        
+        if team == target._team: return
+       
         self._teamswitch_suicide(target)
         with self.room.broadcastbuffer(1, True) as cds:
             if player is None or target.state.is_spectator:

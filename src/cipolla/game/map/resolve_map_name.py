@@ -1,4 +1,4 @@
-from twisted.internet import defer
+from twisted.internet import defer # type: ignore
 
 from cipolla.config_manager import ConfigManager
 from cipolla.game.client.exceptions import GenericError

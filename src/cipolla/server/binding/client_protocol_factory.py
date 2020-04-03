@@ -1,4 +1,4 @@
-from twisted.internet.protocol import Factory
+from twisted.internet.protocol import Factory # type: ignore
 
 from cipolla.server.binding.client_protocol import ClientProtocol
 from txENet.enet_peer_transport import ENetPeerTransport

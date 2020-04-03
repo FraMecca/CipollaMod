@@ -1,16 +1,19 @@
-from twisted.application import service
-from twisted.application.internet import TCPClient
-from zope.interface import implementer
+from twisted.application import service # type: ignore
+from twisted.application.internet import TCPClient # type: ignore
+from zope.interface import implementer # type: ignore
 
 from cipolla.authentication.interfaces import IAuthService
 from cipolla.authentication.services.vanilla.protocol_factory import MasterClientProtocolFactory
 from cipolla.authentication.services.vanilla.punitive_model_adapter import PunitiveModelAdapter
+from cipolla.punitive_effects.punitive_model import PunitiveModel
+
+from typing import List
 
 class VanillaMasterClientService(service.MultiService):
     implementer(IAuthService)
 
     @staticmethod
-    def build(punitive_model, host, port, register_port):
+    def build(punitive_model: PunitiveModel, host: str, port: int, register_port: int):
         domains = ["localhost", ""]
 
         punitive_model_adapter = PunitiveModelAdapter(punitive_model)
@@ -19,7 +22,7 @@ class VanillaMasterClientService(service.MultiService):
 
         return VanillaMasterClientService(port, protocol_factory, interface=host, domains=domains)
 
-    def __init__(self, port, factory, interface='', domains=[]):
+    def __init__(self, port: int, factory: MasterClientProtocolFactory, interface: str = '', domains: List[str] = []) -> None:
         service.MultiService.__init__(self)
 
         self._protocol_factory = factory

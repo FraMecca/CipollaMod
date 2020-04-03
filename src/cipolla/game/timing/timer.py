@@ -1,9 +1,10 @@
+from cipolla.game.timing.game_clock import GameClock
 class Timer(object):
-    def __init__(self, game_clock):
+    def __init__(self, game_clock: GameClock) -> None:
         self.game_clock = game_clock
         self.reset()
         
-    def reset(self):
+    def reset(self) -> None:
         self.start_time = self.game_clock.time_elapsed
         self.accumulator = 0
     

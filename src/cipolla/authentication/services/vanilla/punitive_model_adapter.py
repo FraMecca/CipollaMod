@@ -1,8 +1,9 @@
 from cipolla.punitive_effects.punitive_effect_info import EffectInfo, PermaExpiryInfo
 
 
+from cipolla.punitive_effects.punitive_model import PunitiveModel
 class PunitiveModelAdapter(object):
-    def __init__(self, puntive_model):
+    def __init__(self, puntive_model: PunitiveModel) -> None:
         self._punitive_model = puntive_model
     
     def add_ban(self, effect_desc):

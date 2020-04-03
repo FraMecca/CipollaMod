@@ -1,25 +1,27 @@
 import contextlib
 
-from cube2protocol.cube_data_stream import CubeDataStream
-from cipolla.game.player.player import Player
+from cube2protocol.cube_data_stream import CubeDataStream # type: ignore
 
+from cipolla.game.client.client import Client
+from cipolla.game.player.player import Player
+from typing import Any, Iterator, List, Optional, Tuple, Union, Set, Dict, Iterable
 
 class ClientCollection(object):
-    def __init__(self):
+    def __init__(self) -> None:
         # cn: client
-        self._clients = {}
+        self._clients: Dict[int, Client] = {}
 
-    def add(self, client):
+    def add(self, client: Client) -> None:
         self._clients[client.cn] = client
 
-    def remove(self, client):
+    def remove(self, client: Client) -> None:
         del self._clients[client.cn]
 
     @property
-    def count(self):
+    def count(self) -> int:
         return len(self._clients)
 
-    def to_list(self):
+    def to_list(self) -> List[Any]:
         return list(self._clients.values())
 
     def to_iterator(self):
@@ -28,9 +30,10 @@ class ClientCollection(object):
     def by_cn(self, cn):
         return self._clients.get(cn, None)
 
-    def broadcast(self, channel, data, reliable=False, exclude=None, clients=None):
-        clients = clients or iter(self._clients.values())
-        exclude = set(exclude or ())
+    def broadcast(self, channel: int, data: CubeDataStream, reliable: bool = False, _exclude: Optional[Union[List[Client], List[Player], Tuple]] = None, _clients: Optional[List[Client]] = None) -> None:
+        from cipolla.game.player.player import Player
+        clients = _clients or self._clients.values()
+        exclude = set(_exclude or ())
         for v in tuple(exclude):
             if isinstance(v, Player):
                 exclude.add(v.client)
@@ -39,7 +42,7 @@ class ClientCollection(object):
                 client.send(channel, data, reliable)
 
     @contextlib.contextmanager
-    def broadcastbuffer(self, channel, reliable=False, exclude=[], clients=None):
+    def broadcastbuffer(self, channel: int, reliable: bool = False, exclude: Optional[Union[List[Client], Tuple, List[Player]]] = None, clients: Optional[List[Client]] = None) -> Iterator[CubeDataStream]:
         cds = CubeDataStream()
         yield cds
         self.broadcast(channel, cds, reliable, exclude, clients)

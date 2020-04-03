@@ -1,7 +1,8 @@
 from cube2common.constants import disconnect_types
 
 
-class RoomEntryFailure(Exception): pass
+class RoomEntryFailure(Exception):
+    disconnect_type = disconnect_types.DISC_NONE
 
 
 class RoomEntryPermissionDenied(RoomEntryFailure):

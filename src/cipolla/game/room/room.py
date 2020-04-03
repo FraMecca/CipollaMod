@@ -1,9 +1,11 @@
 import math
 import traceback
 
-from twisted.internet import reactor, defer
+from twisted.internet import reactor, defer # type: ignore
+from twisted.internet.defer import Deferred # type: ignore
 
 from cube2common.constants import MAXROOMLEN, MAXSERVERDESCLEN, MAXSERVERLEN, mastermodes, privileges
+from cube2protocol.cube_data_stream import CubeDataStream # type: ignore
 from cipolla.game.client.exceptions import InsufficientPermissions, GenericError
 from cipolla.game.room.client_collection import ClientCollection
 from cipolla.game.room.player_collection import PlayerCollection
@@ -11,7 +13,6 @@ from cipolla.game.room.game_event_handler import GameEventHandler
 from cipolla.game.room.room_broadcaster import RoomBroadcaster
 from cipolla.game.room.room_entry_context import RoomEntryContext
 from cipolla.game.room.room_map_mode_state import RoomMapModeState
-from cipolla.game.room.roles import AdminRole, MasterRole, BaseRole
 from cipolla.game.map.map_rotation import MapRotation, test_rotation_dict
 from cipolla.game.server_message_formatter import smf, format_cfg_message
 from cipolla.game.map.team import Team
@@ -20,6 +21,15 @@ from cipolla.config_manager import ConfigManager
 from cipolla.protocol import swh
 from cipolla.utils.truncate import truncate
 
+
+from cipolla.game.client.client import Client
+from cipolla.game.gamemode.insta import Insta # type: ignore
+from cipolla.game.map.async_map_meta_data_accessor import AsyncMapMetaDataAccessor
+from cipolla.mods.abstract_mod import AbstractMod
+from cipolla.game.player.player import Player
+from typing import Any, Callable, Dict, Iterator, List, Tuple, Optional, Set
+
+from cipolla.utils.tracing import tracer # type: ignore
 
 class Room(object):
     '''
@@ -30,7 +40,7 @@ class Room(object):
     * Accessors to query the state of the room.
     * Setters to modify the state of the room.
     '''
-    def __init__(self, room_name=None, map_meta_data_accessor=None, defaultGameMode='ffa'):
+    def __init__(self, room_name: str, map_meta_data_accessor: Optional[AsyncMapMetaDataAccessor] = None, defaultGameMode: str = 'ffa') -> None:
         self._game_clock = GameClock()
         self._attach_game_clock_event_handlers()
 
@@ -39,11 +49,11 @@ class Room(object):
 
         self._clients = ClientCollection()
         self._players = PlayerCollection()
-        self._mods = {}
+        self._mods: Dict[str, AbstractMod] = {}
         self._messages = ConfigManager().rooms[room_name].messages
 
         # '123.321.123.111': {client, client, client}
-        self._client_ips = {}
+        self._client_ips: Dict = {}
 
         self.maxplayers = ConfigManager().rooms[self._name].maxplayers
 
@@ -52,20 +62,21 @@ class Room(object):
         # self.mastermask = 0 if self.temporary else -1
         self.mastermask = -1
         self.mastermode = 0
-        self.resume_delay = None
+        self.resume_delay = 3
 
         self.last_destination_room = None
 
         # Holds the client objects with each level of permissions
-        self.masters = set()
-        self.auths = set()
-        self.admins = set()
+        self.masters: Set[Client] = set()
+        self.auths: Set[Client] = set()
+        self.admins: Set[Client] = set()
 
         self._player_event_handler = GameEventHandler()
 
-        # map_rotation_data = test_rotation_dict # don't load this, load the one specified in config
+        # map_rotation_data = test_rotation_dict
+        # don't load this, load the one specified in config
         gamemode = ConfigManager().maps.mode_indexes[defaultGameMode]
-        map_rotation = MapRotation.from_dictionary(ConfigManager().get_rotation_dict(), defaultMode=gamemode)
+        map_rotation = MapRotation.from_dictionary(*ConfigManager().get_rotation_dict(), defaultMode=gamemode)
         self._map_mode_state = RoomMapModeState(self, map_rotation, map_meta_data_accessor, self._game_clock)
 
         self._broadcaster = RoomBroadcaster(self._clients, self._players)
@@ -87,10 +98,10 @@ class Room(object):
         return self._name
 
     @property
-    def server_name(self):
+    def server_name(self) -> str:
         return self._server_name
 
-    @name.setter
+    @name.setter # type: ignore # TODO: get rid of this
     def name(self, value):
         self._name = truncate(value, MAXROOMLEN)
 
@@ -101,7 +112,7 @@ class Room(object):
         room_title = self.name
         return room_title
 
-    def get_entry_context(self, client, player):
+    def get_entry_context(self, client: Client, player: Player) -> RoomEntryContext:
         '''
         Returns an object which encapsulates the details about a client request
         to join this room.
@@ -119,7 +130,7 @@ class Room(object):
         return self._players.to_iterator()
 
     @property
-    def teams_size(self):
+    def teams_size(self) -> Dict[str, Tuple[int, Team, List[Any]]]:
         teams = {team.name: (len(players), team, players) for team, players in self._players.by_team(self.gamemode.teams).items()}
 
         # add base teams
@@ -144,7 +155,7 @@ class Room(object):
         return count
 
     @property
-    def player_count(self):
+    def player_count(self) -> int:
         return self._clients.count
 
     @property
@@ -162,7 +173,7 @@ class Room(object):
         return players.get(name, None)
 
     @property
-    def is_paused(self):
+    def is_paused(self) -> bool:
         return self._game_clock.is_paused
 
     @property
@@ -170,7 +181,7 @@ class Room(object):
         return self._game_clock.is_resuming
 
     @property
-    def is_intermission(self):
+    def is_intermission(self) -> bool:
         return self._game_clock.is_intermission
 
     @property
@@ -186,7 +197,7 @@ class Room(object):
         return int(self._game_clock.time_elapsed * 1000)
 
     @property
-    def gamemode(self):
+    def gamemode(self) -> Insta: # TODO: fix, it is gamemode base
         return self._map_mode_state.gamemode
 
     @property
@@ -198,7 +209,7 @@ class Room(object):
         return self._map_mode_state.mode_num
 
     @property
-    def is_teammode(self):
+    def is_teammode(self) -> bool:
         return self.gamemode.hasteams
 
     @property
@@ -211,7 +222,7 @@ class Room(object):
     def contains_client_with_ip(self, client_ip):
         return client_ip in self._client_ips
 
-    def is_mod_active(self, mod_name):
+    def is_mod_active(self, mod_name: str) -> bool:
         return mod_name in self._mods
 
     def get_mod(self, mod_name):
@@ -224,12 +235,18 @@ class Room(object):
         assert self._mods[mod.name] is mod
         del self._mods[mod.name]
 
+    def admins_present(self):
+        return bool(self.admins)
+
+    def masters_present(self):
+        return bool(self.masters)
+
     ###########################################################################
     #######################         Setters         ###########################
     ###########################################################################
 
     @defer.inlineCallbacks
-    def client_enter(self, entry_context):
+    def client_enter(self, entry_context: RoomEntryContext) -> Iterator[Deferred]:
         yield self.await_map_mode_initialized()
 
         client = entry_context.client
@@ -252,7 +269,7 @@ class Room(object):
 
         self.gamemode.on_player_connected(player)
 
-    def client_leave(self, client):
+    def client_leave(self, client: Client) -> None:
         self._clients.remove(client)
         for player in client.player_iter():
             self._player_disconnected(player)
@@ -271,10 +288,11 @@ class Room(object):
             for remaining_client in self._clients.to_iterator():
                 swh.put_cdis(cds, remaining_client)
 
+    @tracer
     def pause(self):
         self._game_clock.pause()
-
-    def resume(self):
+    @tracer
+    def resume(self) -> None:
         self._game_clock.resume(self.resume_delay)
 
     def set_resuming_state(self):
@@ -284,7 +302,7 @@ class Room(object):
     def end_match(self):
         self._game_clock.timeleft = 0
 
-    def change_map_mode(self, map_name, mode_name):
+    def change_map_mode(self, map_name: str, mode_name: str) -> Deferred:
         self._game_clock.cancel()
         return self._map_mode_state.change_map_mode(map_name, mode_name)
 
@@ -292,7 +310,7 @@ class Room(object):
         self._game_clock.cancel()
         return self._map_mode_state.rotate_map_mode()
 
-    def await_map_mode_initialized(self):
+    def await_map_mode_initialized(self) -> Deferred:
         return self._map_mode_state.await_map_mode_initialized(self.player_count)
 
     def set_mastermode(self, mastermode):
@@ -300,7 +318,7 @@ class Room(object):
         self._update_current_masters()
 
     @property
-    def broadcastbuffer(self):
+    def broadcastbuffer(self) -> Callable:
         return self._broadcaster.broadcastbuffer
 
     def server_message(self, message, exclude=()):
@@ -310,7 +328,8 @@ class Room(object):
     #######################  Client event handling  ###########################
     ###########################################################################
 
-    def handle_client_event(self, event_name, client, *args, **kwargs):
+    @tracer
+    def handle_client_event(self, event_name: str, client: Client, *args, **kwargs) -> None:
         handler = client.role.handle_event
         deferred = defer.maybeDeferred(handler, event_name, self, client, *args, **kwargs)
         deferred.addErrback(client.handle_exception)
@@ -319,7 +338,7 @@ class Room(object):
     #######################  Player event handling  ###########################
     ###########################################################################
 
-    def handle_player_event(self, event_name, player, *args, **kwargs):
+    def handle_player_event(self, event_name: str, player: Player, *args, **kwargs) -> None:
         handler = self._player_event_handler.handle_event
         deferred = defer.maybeDeferred(handler, event_name, self, player, *args, **kwargs)
         deferred.addErrback(player.client.handle_exception)
@@ -328,7 +347,7 @@ class Room(object):
     #####################  Game clock event handling  #########################
     ###########################################################################
 
-    def _attach_game_clock_event_handlers(self):
+    def _attach_game_clock_event_handlers(self) -> None:
         self._game_clock.add_resumed_callback(self._on_game_clock_resumed)
         self._game_clock.add_paused_callback(self._on_game_clock_paused)
         self._game_clock.add_resume_countdown_tick_callback(self._on_game_clock_resume_countdown_tick)
@@ -336,9 +355,9 @@ class Room(object):
         self._game_clock.add_intermission_started_callback(self._on_game_clock_intermission)
         self._game_clock.add_intermission_ended_callback(self._on_game_clock_intermission_ended)
 
-    def _on_game_clock_resumed(self):
+    def _on_game_clock_resumed(self) -> None:
         self._broadcaster.resume()
-        if not self.gamemode.initialized:
+        if not self.gamemode or not self.gamemode.initialized:
             self.gamemode.initialize()
 
     def _on_game_clock_paused(self):
@@ -364,12 +383,12 @@ class Room(object):
     #######################  Other private methods  ###########################
     ###########################################################################
 
-    def _flush_messages(self):
+    def _flush_messages(self) -> None:
         if not self.decommissioned:
             reactor.callLater(0, reactor.addSystemEventTrigger, 'before', 'flush_bindings', self._flush_messages)
         self._broadcaster.flush_messages()
 
-    def _initialize_client_match_data(self, cds, client):
+    def _initialize_client_match_data(self, cds: CubeDataStream, client: Client) -> None:
         player = client.get_player()
 
         swh.put_mapchange(cds, self._map_mode_state.map_name, self._map_mode_state.mode_num, hasitems=False)
@@ -391,7 +410,7 @@ class Room(object):
             self.gamemode.spawn_loadout(player)
             swh.put_spawnstate(cds, player)
 
-    def _initialize_client(self, client):
+    def _initialize_client(self, client: Client) -> None:
         existing_players = list(self.players)
 
         with client.sendbuffer(1, True) as cds:
@@ -416,7 +435,7 @@ class Room(object):
             formatted = format_cfg_message(message, self, client.get_player())
             defer.maybeDeferred(self.public_message, formatted)
 
-    def _player_disconnected(self, player):
+    def _player_disconnected(self, player: Player) -> None:
         self._players.remove(player)
         self._broadcaster.player_disconnected(player)
         self.gamemode.on_player_disconnected(player)
@@ -429,13 +448,13 @@ class Room(object):
             formatted = format_cfg_message(message, self, player)
             defer.maybeDeferred(self.public_message, formatted)
 
-    def _get_room_title(self):
+    def _get_room_title(self) -> str:
         server_name = truncate(self._server_name, MAXSERVERLEN)
         # room_title = smf.format("{server_name} {room_title#room.name}", room=self, server_name=server_name)
         room_title = self.name
         return room_title
 
-    def _put_room_title(self, cds, client):
+    def _put_room_title(self, cds: CubeDataStream, client: Client) -> None:
         room_title = truncate(self._get_room_title(), MAXSERVERDESCLEN)
         swh.put_servinfo(cds, client, haspwd=False, description=room_title, domain='')
 
@@ -447,7 +466,7 @@ class Room(object):
         for client in self.clients:
             self._send_room_title(client)
 
-    def public_message(self, msg):
+    def public_message(self, msg: str) -> None:
         if msg:
             self._broadcaster.server_message(msg)
 
@@ -461,10 +480,11 @@ class Room(object):
         else:
             print("invalid change")
 
-    def _update_current_masters(self):
+    def _update_current_masters(self) -> None:
         self._broadcaster.current_masters(self.mastermode, self.clients)
 
-    def change_privilege(self, target, requested_privilege):
+    def change_privilege(self, target: Client, requested_privilege: int) -> None:
+        from cipolla.game.room.roles import AdminRole, MasterRole, BaseRole
         if requested_privilege == privileges.PRIV_NONE:
             target.role = BaseRole()
             self.admins.discard(target)

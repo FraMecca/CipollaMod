@@ -5,34 +5,64 @@ from cipolla.game.player.kpd import KPD
 from cipolla.game.timing.expiry import Expiry
 from cipolla.game.timing.timer import Timer
 from cipolla.protocol import swh
+from cipolla.game.timing.game_clock import GameClock
 
+
+from typing import List, Optional, Dict
 
 class PlayerState(object):
-    def __init__(self):
-        self.game_clock = None
+    def __init__(self) -> None:
+        self.game_clock: Optional[GameClock] = None
         self.messages = CubeDataStream()
-        self.state = -1
+        self.state: int = -1
+
+        self.lifesequence = 0
+        self.frags = 0
+        self.deaths = 0
+        self.suicides = 0
+        self.teamkills = 0
+        self.damage_dealt = 0
+        self.damage_spent = 0
+        self.flags = 0
+        self.flag_returns = 0
+        self.health = 100
+        self.maxhealth = 100
+        self.armour = 0
+        self.armourtype = armor_types.A_BLUE
+        self.gunselect = weapon_types.GUN_PISTOL
+        self.ammo = [0] * weapon_types.NUMGUNS
+        self.death_timer = None
+        self.pos = vec(0, 0, 0)
+        self._quadexpiry: Optional[Expiry] = None
+        self.shotwait: Optional[Expiry] = None
+        self.spawnwait: Optional[Expiry] = None
+        self._pending_spawn = False
+        self.rockets: Dict = {}
+        self.grenades: Dict = {}
+        self.position = b''
+
         self.reset()
 
-    def use_game_clock(self, game_clock):
+    def use_game_clock(self, game_clock: GameClock) -> None:
         self.game_clock = game_clock
 
     @property
-    def has_quad(self):
+    def has_quad(self) -> bool:
         if self._quadexpiry is not None:
             return not self._quadexpiry.is_expired
         return False
 
     @property
-    def quad_multiplier(self):
+    def quad_multiplier(self) -> int:
         if self.has_quad:
             return 4
         else:
             return 1
 
     @property
-    def quadremaining(self):
+    def quadremaining(self) -> int:
         if self.has_quad:
+            assert self._quadexpiry is not None
             return self._quadexpiry.remaining
         else:
             return 0
@@ -91,7 +121,7 @@ class PlayerState(object):
             return 0.0
 
     @property
-    def is_alive(self):
+    def is_alive(self) -> bool:
         return self.state == client_states.CS_ALIVE
 
     @property
@@ -99,7 +129,7 @@ class PlayerState(object):
         if self.death_timer is None: return None
         return self.death_timer.time_elapsed * 1000
 
-    def check_alive(self, threshold=None):
+    def check_alive(self, threshold: Optional[int] = None) -> bool:
         if threshold is None: return self.is_alive
         if self.is_alive:
             return True
@@ -124,13 +154,13 @@ class PlayerState(object):
         else:
             print("failed to set is_spectator")
 
-    def respawn(self):
+    def respawn(self) -> None:
         self._pending_spawn = True
         self.lifesequence = (self.lifesequence + 1) & 0x7F
         self._quadexpiry = None
-        self.position = None
+        self.position = b''
 
-    def on_respawn(self, lifesequence, gunselect):
+    def on_respawn(self, lifesequence: int, gunselect: int) -> None:
         if lifesequence != self.lifesequence: return
         self._pending_spawn = False
         self.state = client_states.CS_ALIVE
@@ -138,15 +168,15 @@ class PlayerState(object):
 
         swh.put_spawn(self.messages, self)
 
-    def update_position(self, position, raw_position):
+    def update_position(self, position: List[int], raw_position: bytes) -> None:
         self.position = raw_position
         self.pos.v = position
 
-    def clear_flushed_state(self):
+    def clear_flushed_state(self) -> None:
         self.messages = CubeDataStream()
-        self.position = None
+        self.position = b''
 
-    def map_change_reset(self):
+    def map_change_reset(self) -> None:
         if self.state != client_states.CS_SPECTATOR:
             self.state = client_states.CS_DEAD
 
@@ -166,7 +196,7 @@ class PlayerState(object):
         self.ammo = [0] * weapon_types.NUMGUNS
 
         if self.game_clock is not None:
-            self.playing_timer = Timer(self.game_clock)
+            self.playing_timer: Optional[Timer] = Timer(self.game_clock)
         else:
             self.playing_timer = None
 
@@ -183,9 +213,9 @@ class PlayerState(object):
         self.grenades = {}
 
         self.messages.clear()
-        self.position = None
+        self.position = b''
 
-    def reset(self):
+    def reset(self) -> None:
         self.map_change_reset()
         self.state = client_states.CS_ALIVE
         self.lifesequence = -1

@@ -1,11 +1,13 @@
-from twisted.internet import defer
+from twisted.internet import defer # type: ignore
 
 from cipolla.game.server_message_formatter import error, info
 from cipolla.protocol import swh
 
 
+from cipolla.authentication.auth_world_view import AuthWorldView
+from cipolla.game.client.client import Client
 class ClientAuthState(object):
-    def __init__(self, client, auth_world_view):
+    def __init__(self, client: Client, auth_world_view: AuthWorldView) -> None:
         self.client = client
         self.auth_world_view = auth_world_view
 

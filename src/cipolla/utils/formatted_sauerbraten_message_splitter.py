@@ -1,6 +1,7 @@
 import re
 import textwrap
 
+from typing import List
 FMT_CTRL = ord('\f')
 SAVE = ord('s')
 RESTORE = ord('r')
@@ -17,23 +18,23 @@ def get_last_color(chunk):
     return DEFAULT
 
 class FormattedSauerbratenMessageSplitter(object):
-    def __init__(self, max_length):
+    def __init__(self, max_length: int) -> None:
         self._max_length = max_length
 
         self.text_wrapper = textwrap.TextWrapper(width=max_length - 2, break_long_words=True, drop_whitespace=True, replace_whitespace=False)
 
-    def split(self, message):
-        if isinstance(message, bytearray):
-            message = bytearray(message)
+    def split(self, _message: str) -> List[str]:
+        if isinstance(_message, bytearray):
+            message = _message
         else:
-            message = bytearray(message, 'utf_8')
+            message = bytearray(_message, 'utf_8')
 
         message = self.remove_color_saves_restores(message)
-        message = self.remove_redundant_coloring(message).decode('utf_8')
-        chunks = [bytearray(chunk, 'utf_8') for chunk in self.text_wrapper.wrap(message)]
+        _message = self.remove_redundant_coloring(message).decode('utf_8')
+        chunks = [bytearray(chunk, 'utf_8') for chunk in self.text_wrapper.wrap(_message)]
         return [chunk.decode('utf_8') for chunk in self.colorize_chunks(chunks)]
 
-    def remove_color_saves_restores(self, message):
+    def remove_color_saves_restores(self, message: bytearray) -> bytearray:
         """Treats the save & restore color codes as pushing to a stack.
         Resolves these codes to absolute colors."""
         assert(isinstance(message, bytearray))
@@ -73,7 +74,7 @@ class FormattedSauerbratenMessageSplitter(object):
 
         return message
 
-    def remove_redundant_coloring(self, message):
+    def remove_redundant_coloring(self, message: bytearray) -> bytes:
         "Removes adjacent colors and duplicate successive uses of the same color."
         assert(isinstance(message, bytearray))
 
@@ -96,7 +97,7 @@ class FormattedSauerbratenMessageSplitter(object):
 
         return adjacent_color_pattern.sub(adjacent_color_replacement, message)
 
-    def colorize_chunks(self, chunks):
+    def colorize_chunks(self, chunks: List[bytearray]) -> List[bytearray]:
         "Continues coloring from one chunk to the next."
         ci = 1
         while ci < len(chunks):

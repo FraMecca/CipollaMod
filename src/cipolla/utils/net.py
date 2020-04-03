@@ -1,7 +1,7 @@
 from socket import inet_ntop, inet_pton, ntohl, htonl, AF_INET
 from struct import pack, unpack
 
-def dottedQuadToLong(ip):
+def dottedQuadToLong(ip: str) -> int:
     "convert decimal dotted quad string to long integer"
     return ntohl(unpack('!L',inet_pton(AF_INET,ip))[0])
 

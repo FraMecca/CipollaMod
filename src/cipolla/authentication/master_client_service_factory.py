@@ -1,14 +1,15 @@
-import cipolla.authentication.services  # @UnusedImport
-
+from cipolla.authentication.services.vanilla_service import VanillaMasterClientService
+from cipolla.punitive_effects.punitive_model import PunitiveModel
+from cipolla.utils.configuration_utils import ConfigurationError
 
 class MasterClientServiceFactory(object):
-    def __init__(self, punitive_model):
+    def __init__(self, punitive_model: PunitiveModel) -> None:
         from cipolla.authentication.services.types import types as service_types
         self._punitive_model = punitive_model
 
         self._service_types = service_types
 
-    def build_master_client_service(self, host, port, register_port):
+    def build_master_client_service(self, host: str, port: int, register_port: int) -> VanillaMasterClientService:
         master_client_type = 'vanilla'
         if master_client_type is None:
             raise ConfigurationError("Master client type was not specified or was null, please specify a valid 'type' parameter.")

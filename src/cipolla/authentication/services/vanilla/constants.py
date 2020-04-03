@@ -1,4 +1,4 @@
-from cube2common.utils.enum import enum
+from cube2common.utils.enum import enum # type: ignore
 
 
 

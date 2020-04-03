@@ -3,7 +3,7 @@ import pickle
 import os
 import sys
 
-from cube2map.read_map_meta_data import read_map_data
+from cube2map.read_map_meta_data import read_map_data # type: ignore
 
 
 def map_filename_to_map_name(map_filename):

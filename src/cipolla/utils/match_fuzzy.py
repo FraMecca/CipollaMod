@@ -1,6 +1,8 @@
-import Levenshtein
+import Levenshtein # type: ignore
 
-def match_fuzzy(identifier, possibility_list, allow_ci_check=True):
+from typing import Tuple, Optional
+
+def match_fuzzy(identifier: str, possibility_list: Tuple, allow_ci_check: bool = True) -> Optional[str]:
         "Returns the nearest match to the text of identifier from a list of possibilities."
         if not len(possibility_list): return None
         threshold = len(identifier) - 1

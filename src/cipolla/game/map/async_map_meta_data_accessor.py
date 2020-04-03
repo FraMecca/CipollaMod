@@ -2,12 +2,15 @@ import pickle
 import os.path
 import sys
 
-from twisted.internet import defer, utils
+from twisted.internet import defer, utils # type: ignore
+from twisted.internet.defer import Deferred # type: ignore
+
 from cipolla.utils.list_to_unicode import list_to_unicode
 
+from typing import List
 map_data_reader_filename = os.path.join(os.path.dirname(__file__), 'map_data_reader_process.py')
 
-def run_map_data_reader_process(args):
+def run_map_data_reader_process(args: List[str]) -> Deferred:
     args.insert(0, map_data_reader_filename)
     deferred = utils.getProcessOutput(sys.executable, args, env={'PYTHONPATH': os.environ.get('PYTHONPATH', '')})
     deferred.addCallback(pickle.loads)
@@ -16,21 +19,21 @@ def run_map_data_reader_process(args):
 def get_map_names(map_glob_expression):
     return run_map_data_reader_process(['-l', map_glob_expression])
 
-def get_map_data(map_path):
+def get_map_data(map_path: str) -> Deferred:
     return run_map_data_reader_process(['-d', map_path])
 
 class AsyncMapMetaDataAccessor(object):
-    def __init__(self, package_dir):
+    def __init__(self, package_dir: str) -> None:
         self.package_dir = package_dir
 
-        self._cached_map_meta = {}
+        self._cached_map_meta = {} # type: ignore
         self._map_name_cache = None
 
-    def get_map_path(self, map_name):
+    def get_map_path(self, map_name: str) -> str:
         map_filename = "{}.ogz".format(map_name)
         return os.path.join(self.package_dir, "base", map_filename)
 
-    def get_map_data(self, map_name, default=None):
+    def get_map_data(self, map_name: str, default: None = None) -> Deferred:
         if map_name in self._cached_map_meta:
             return defer.succeed(self._cached_map_meta.get(map_name))
         else:

@@ -1,12 +1,12 @@
 import traceback
 
-from twisted.internet import reactor
-from twisted.internet.protocol import connectionDone
+from twisted.internet import reactor # type: ignore
+from twisted.internet.protocol import connectionDone # type: ignore
 
-from cube2common.constants import disconnect_types
-from cipolla.utils.rate_limiter import RateLimiter
-from txENet.enet_client_protocol import ENetClientProtocol
-import enet
+from cube2common.constants import disconnect_types # type: ignore
+from cipolla.utils.rate_limiter import RateLimiter # type: ignore
+from txENet.enet_client_protocol import ENetClientProtocol # type: ignore
+import enet # type: ignore
 
 
 class ClientProtocol(ENetClientProtocol):

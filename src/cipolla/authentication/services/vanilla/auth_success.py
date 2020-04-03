@@ -1,4 +1,4 @@
-from zope.interface import implementer
+from zope.interface import implementer # type: ignore
 
 from cipolla.authentication.interfaces import IGroupProvider, IAuthSuccess
 from cipolla.authentication.domain_to_auth_group import domain_to_auth_group

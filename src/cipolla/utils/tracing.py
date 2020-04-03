@@ -1,9 +1,10 @@
 import logging
 
+from typing import Callable
 logger = None
 indent = 0
 
-def setup_logger(filename):
+def setup_logger(filename: str) -> None:
     global logger
     assert logger is None
 
@@ -18,13 +19,13 @@ def setup_logger(filename):
     logger = logging.getLogger('debug')
     logger.addHandler(console)
 
-def started(f_id, func, args, kw):
+def started(f_id, func, args, kw) -> None:
     global indent
     indent += 2
     bg = f"{' '*(indent-2)}|\n{' '*(indent-2)}+-> |START|{f_id}| "
     printExecution(bg, func, f'{args}, {kw}')
 
-def ended(f_id, func):
+def ended(f_id: int, func: Callable) -> None:
     global indent
     indent -= 2
     bg = f"{' '*(indent)}+{' '*(indent)} | END |{f_id}| "
@@ -36,7 +37,7 @@ def raised(f_id, func, e):
     bg = f"{' '*(indent)}+{' '*(indent)} | RAISE |{f_id}| "
     printExecution(bg, func, '{'+str(e)+'}')
 
-def printExecution(beginStr, func, argStr):
+def printExecution(beginStr: str, func: Callable, argStr: str) -> None:
     assert logger is not None
     logger.debug(f"{beginStr} {func}: {argStr}")
 
@@ -48,7 +49,7 @@ def function_id(func, args, kwargs):
 
 progressiveId = 0
 
-def tracer(func):
+def tracer(func: Callable) -> Callable:
     def dump_exception(fname, e):
         from pickle import dump
         with open(fname, 'wb') as fp:
@@ -79,5 +80,5 @@ def decorator_to_all_members(cls, dec):
         if isinstance(fn, types.FunctionType):
             setattr(cls, name, dec(fn))
 
-def trace_class(cls):
+def trace_class(cls: Callable):
     decorator_to_all_members(cls, tracer)

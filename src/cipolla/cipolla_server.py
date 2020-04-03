@@ -1,11 +1,11 @@
 import logging
 import os
 
-from twisted.application import service
-from twisted.internet import reactor, defer
+from twisted.application import service # type: ignore
+from twisted.internet import reactor, defer # type: ignore
 
-from cube2common.constants import disconnect_types
-from cube2protocol.sauerbraten.collect.server_read_message_processor import ServerReadMessageProcessor
+from cube2common.constants import disconnect_types # type: ignore
+from cube2protocol.sauerbraten.collect.server_read_message_processor import ServerReadMessageProcessor # type: ignore
 from .server.lan_info.lan_info_service import LanInfoService
 from cipolla.authentication.auth_world_view_factory import AuthWorldViewFactory, ANY
 from cipolla.authentication.master_client_service_factory import MasterClientServiceFactory
@@ -27,7 +27,6 @@ logger = logging.getLogger(__name__)
 class CipollaServer(object):
     def __init__(self):
         self.root_service = service.MultiService()
-
 
         self.server_name = ConfigManager().server.name
         self.server_info = ConfigManager().server.info
@@ -81,7 +80,7 @@ class CipollaServer(object):
 
             max_duplicate_peers = 10
             self.binding_service.add_binding(interface, port, maxclients, maxdown, maxup, max_duplicate_peers)
-            self.room_bindings.add_room(port, room, '')
+            self.room_bindings.add_room(port, room, False)
             self.lan_info_service.add_lan_info_for_room(room, interface, port)
 
             #TODO better validation of room

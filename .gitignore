@@ -1,4 +1,5 @@
 packages
+.mypy_cache
 include
 *.cache
 *.pid

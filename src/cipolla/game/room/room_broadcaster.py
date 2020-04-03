@@ -5,21 +5,27 @@ from cube2protocol.cube_data_stream import CubeDataStream
 from cipolla.protocol import swh
 
 
+from cipolla.game.client.client import Client
+from cipolla.game.player.player import Player
+from cipolla.game.room.client_collection import ClientCollection
+from cipolla.game.room.player_collection import PlayerCollection
+from cube2common.vec import vec
+from typing import Callable, Iterator, Tuple
 class RoomBroadcaster(object):
-    def __init__(self, client_collection, player_collection):
+    def __init__(self, client_collection: ClientCollection, player_collection: PlayerCollection) -> None:
         self._client_collection = client_collection
         self._player_collection = player_collection
 
     @contextlib.contextmanager
-    def broadcastbuffer(self, channel, reliable, *args):
+    def broadcastbuffer(self, channel: int, reliable: bool, *args) -> Iterator[CubeDataStream]:
         with self.clientbuffer(channel, reliable, *args) as cds:
             yield cds
 
     @property
-    def clientbuffer(self):
+    def clientbuffer(self) -> Callable:
         return self._client_collection.broadcastbuffer
 
-    def resume(self):
+    def resume(self) -> None:
         with self.broadcastbuffer(1, True) as cds:
             swh.put_pausegame(cds, 0)
 
@@ -34,7 +40,7 @@ class RoomBroadcaster(object):
     def intermission(self):
         self.time_left(0)
 
-    def shotfx(self, player, gun, shot_id, from_pos, to_pos):
+    def shotfx(self, player: Player, gun: int, shot_id: int, from_pos: vec, to_pos: vec) -> None:
         with self.broadcastbuffer(1, True, [player]) as cds:
             swh.put_shotfx(cds, player, gun, shot_id, from_pos, to_pos)
 
@@ -46,7 +52,7 @@ class RoomBroadcaster(object):
         with self.broadcastbuffer(1, True) as cds:
             swh.put_died(cds, player, killer, teams)
 
-    def player_disconnected(self, player):
+    def player_disconnected(self, player: Player) -> None:
         with self.broadcastbuffer(1, True) as cds:
             swh.put_cdis(cds, player)
 
@@ -58,11 +64,11 @@ class RoomBroadcaster(object):
         with self.broadcastbuffer(0, True, [player]) as cds:
             swh.put_jumppad(cds, player, jumppad)
 
-    def server_message(self, message, exclude=()):
+    def server_message(self, message: str, exclude: Tuple = ()) -> None:
         with self.broadcastbuffer(1, True, exclude) as cds:
             swh.put_servmsg(cds, message)
 
-    def client_connected(self, client):
+    def client_connected(self, client: Client) -> None:
         player = client.get_player()
         with self.broadcastbuffer(1, True, [client]) as cds:
             swh.put_resume(cds, [player])
@@ -79,7 +85,7 @@ class RoomBroadcaster(object):
                 swh.put_sound(tm, sound)
                 swh.put_clientdata(cds, client, str(tm))
 
-    def flush_messages(self):
+    def flush_messages(self) -> None:
         try:
             class ClientBufferReference(object):
                 def __init__(self, client, positions_next_byte, positions_size, messages_next_byte, messages_size):

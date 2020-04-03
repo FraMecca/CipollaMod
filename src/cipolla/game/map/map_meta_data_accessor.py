@@ -1,9 +1,9 @@
 import glob
 import os.path
 
-from twisted.internet import defer
+from twisted.internet import defer # type: ignore
 
-from cube2map.read_map_meta_data import read_map_data
+from cube2map.read_map_meta_data import read_map_data # type: ignore
 from cipolla.utils.list_to_unicode import list_to_unicode
 
 

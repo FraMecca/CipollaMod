@@ -1,4 +1,4 @@
-from twisted.python import usage
+from twisted.python import usage # type: ignore
 
 class Options(usage.Options):
     optParameters = [

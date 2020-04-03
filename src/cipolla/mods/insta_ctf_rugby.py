@@ -1,9 +1,10 @@
 from cube2common.constants import armor_types, weapon_types
-from cipolla.game.gamemode.gamemodes import gamemodes
-from cipolla.game.gamemode.insta_ctf import InstaCtf
 from cipolla.game.server_message_formatter import red, yellow
 from cipolla.protocol import swh
 from cipolla.mods.abstract_mod import AbstractMod
+#TODO: fix these
+from cipolla.game.gamemode.gamemodes import gamemodes # type: ignore
+from cipolla.game.gamemode.insta_ctf import InstaCtf # type: ignore
 
 class InstaCtfRugbyMod(AbstractMod):
     name = "rugby"
@@ -34,7 +35,7 @@ class InstaCtfRugby(InstaCtf):
         if target is None: return
 
         ownsflag, flag = self.owns_flag(player)
-        if ownsflag and target.teamname == player.teamname:
+        if ownsflag and target._team == player._team:
             flag.owner = target
             with self.room.broadcastbuffer(1, True) as cds:
                 swh.put_takeflag(cds, target, flag)
@@ -43,4 +44,4 @@ class InstaCtfRugby(InstaCtf):
                         f'{yellow(target.name)}: {red(float(distance)/100)} ogro feet')
         else:
             super().on_player_hit(player, gun, target_cn, lifesequence, distance, rays, dx, dy, dz)
-    
+   

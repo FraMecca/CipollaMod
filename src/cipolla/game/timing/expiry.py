@@ -1,5 +1,7 @@
+from cipolla.game.timing.game_clock import GameClock
+from typing import Union
 class Expiry(object):
-    def __init__(self, game_clock, duration):
+    def __init__(self, game_clock: GameClock, duration: Union[float, int]) -> None:
         self.game_clock = game_clock
         self.unblock_time = self.game_clock.time_elapsed + duration
 

@@ -1,4 +1,4 @@
-from twisted.python import log
+from twisted.python import log # type: ignore
 import logging
 from logging import Logger
 

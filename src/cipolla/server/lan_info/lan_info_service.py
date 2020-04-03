@@ -1,5 +1,5 @@
-from twisted.application import service
-from twisted.internet import reactor
+from twisted.application import service # type: ignore
+from twisted.internet import reactor # type: ignore
 
 from cipolla.server.lan_info.lan_info_protocol import LanInfoProtocol
 from cipolla.server.lan_info.lan_info_responder import LanInfoResponder

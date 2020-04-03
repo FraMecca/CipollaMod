@@ -14,6 +14,10 @@ from cipolla.protocol import swh
 #                 func(self, *args, **kwargs)
 #         base_func(self, *args, **kwargs)
 #     return multidispatcher
+from cipolla.game.player.player import Player
+from cube2protocol.cube_data_stream import CubeDataStream
+
+from cipolla.utils.tracing import tracer
 def extract_public_methods(obj):
     return set(filter(lambda t: t[0][0] != '_', dir(obj)))
 
@@ -47,7 +51,7 @@ class ModeBase(object):
         self.teams = None
     
     
-    def initialize(self):
+    def initialize(self) -> None:
         self.initialized = True
     
     
@@ -55,7 +59,7 @@ class ModeBase(object):
         pass
     
     
-    def initialize_player(self, cds, player):
+    def initialize_player(self, cds: CubeDataStream, player: Player) -> None:
         pass
     
     
@@ -119,16 +123,16 @@ class ModeBase(object):
                 target.state.deaths += 1
                 if player == target:
                     player.state.suicides += 1
-                if self.hasteams and player.teamname == target.teamname:
+                if self.hasteams and player._team == target._team:
                     player.state.teamkills += 1
-                if player == target or self.hasteams and player.teamname == target.teamname:
+                if player == target or self.hasteams and player._team == target._team:
                     mod = -1
                 else:
                     mod = 1
 
                 player.state.frags += mod
-                if self.hasteams and player.teamname != '':
-                    self.teams[player.teamname].frags += mod
+                if self.hasteams and player._team != '':
+                    self.teams[player._team].frags += mod
 
                 swh.put_died(cds, target, player, self.teams)
                 self.on_player_death(target, player)
@@ -166,10 +170,13 @@ class ModeBase(object):
 
 
     def on_player_death(self, player, killer):
+        if player == killer:
+            player.state.frags -= 1
+
         player.state.spawnwait = Expiry(self.room._game_clock, self.spawndelay)
         player.state.died()
-    
-    
+  
+  
     def on_player_taunt(self, player):
         swh.put_taunt(player.state.messages)
 
@@ -184,9 +191,6 @@ class ModeBase(object):
             self._spectate_suicide(cds, player)
             player.state.is_spectator = True
             swh.put_spectator(cds, player)
-
-        if player.client.cn == player.pn:
-            self.room.ready_up_controller.on_client_spectated(player.client)
 
 
     def on_player_unspectate(self, player):
@@ -236,7 +240,7 @@ class ModeBase(object):
                 swh.put_spawnstate(cds, player)
 
 
-    def spawn_loadout(self, player):
+    def spawn_loadout(self, player: Player) -> None:
         player.state.health = self.spawnhealth
         player.state.armour = self.spawnarmour
         player.state.armourtype = self.spawnarmourtype

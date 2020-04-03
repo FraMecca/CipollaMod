@@ -1,19 +1,21 @@
-from twisted.internet.protocol import DatagramProtocol
+from twisted.internet.protocol import DatagramProtocol # type: ignore
 
-from cube2protocol.read_cube_data_stream import ReadCubeDataStream
+from cube2protocol.read_cube_data_stream import ReadCubeDataStream # type: ignore
+from cipolla.server.lan_info.lan_info_responder import LanInfoResponder
 
+from typing import List
 
 class LanInfoProtocol(DatagramProtocol):
-    def __init__(self, multicast=False, ext_info_enabled=True):
-        self.lan_info_responders = []
+    def __init__(self, multicast: bool = False, ext_info_enabled: bool = True) -> None:
+        self.lan_info_responders: List[LanInfoResponder] = []
         self.multicast = multicast
         self.ext_info_enabled = ext_info_enabled
         
-    def startProtocol(self):
+    def startProtocol(self) -> None:
         if self.multicast:
             self.transport.setTTL(255)
 
-    def add_responder(self, lan_info_responder):
+    def add_responder(self, lan_info_responder: LanInfoResponder) -> None:
         self.lan_info_responders.append(lan_info_responder)
 
     def datagramReceived(self, data, address):

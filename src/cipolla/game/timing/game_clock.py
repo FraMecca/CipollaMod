@@ -1,4 +1,4 @@
-from twisted.internet import reactor
+from twisted.internet import reactor # type: ignore
 
 from cube2common.utils.enum import enum
 from cipolla.game.timing.callback import Callback, call_all
@@ -6,36 +6,38 @@ from cipolla.game.timing.resume_countdown import ResumeCountdown
 from cipolla.game.timing.scheduled_callback_wrapper import ScheduledCallbackWrapper, resume_all, pause_all
 
 
+from typing import Callable, List, Optional
+
 states = enum('NOT_STARTED', 'RUNNING', 'PAUSED', 'RESUMING', 'INTERMISSION', 'ENDED')
 
 class GameClock(object):
     
     clock = reactor
     
-    def __init__(self):
+    def __init__(self) -> None:
         self._state = states.NOT_STARTED
         
-        self._last_resume_time = None
-        self._time_elapsed = None
+        self._last_resume_time: Optional[int] = None
+        self._time_elapsed = 0.0
         
-        self._intermission_duration_seconds = None
+        self._intermission_duration_seconds = 0
         
-        self._intermission_start_scheduled_callback_wrapper = None
-        self._intermission_end_scheduled_callback_wrapper = None
-        self._resume_countdown = None
+        self._intermission_start_scheduled_callback_wrapper: Optional[ScheduledCallbackWrapper] = None
+        self._intermission_end_scheduled_callback_wrapper: Optional[ScheduledCallbackWrapper] = None
+        self._resume_countdown: Optional[ScheduledCallbackWrapper] = None
         
         self._timed = True
         
-        self._paused_callbacks = []
-        self._resumed_callbacks = []
-        self._resume_countdown_tick_callbacks = []
-        self._timeleft_altered_callbacks = []
-        self._intermission_started_callbacks = []
-        self._intermission_ended_callbacks = []
+        self._paused_callbacks: List[Callback] = []
+        self._resumed_callbacks: List[Callback] = []
+        self._resume_countdown_tick_callbacks: List[Callback] = []
+        self._timeleft_altered_callbacks: List[Callback] = []
+        self._intermission_started_callbacks: List[Callback] = []
+        self._intermission_ended_callbacks: List[Callback] = []
         
-        self._scheduled_callback_wrappers = []
+        self._scheduled_callback_wrappers: List[ScheduledCallbackWrapper] = []
         
-    def _cancel_existing_scheduled_events(self):
+    def _cancel_existing_scheduled_events(self) -> None:
         if self._intermission_end_scheduled_callback_wrapper is not None:
             self._intermission_end_scheduled_callback_wrapper.cancel()
             self._intermission_end_scheduled_callback_wrapper = None
@@ -47,17 +49,17 @@ class GameClock(object):
         for scheduled_callback_wrapper in list(self._scheduled_callback_wrappers):
             scheduled_callback_wrapper.cancel()
 
-    def cancel(self):
+    def cancel(self) -> None:
         '''Cancel the current game that is timed and start a new one.'''
         self._cancel_existing_scheduled_events()
         self._state = states.ENDED
 
-    def _assert_not_started(self):
+    def _assert_not_started(self) -> None:
         assert(self._intermission_start_scheduled_callback_wrapper is None)
         assert(self._intermission_end_scheduled_callback_wrapper is None)
         assert(not self.is_started)
     
-    def start(self, game_duration_seconds, intermission_duration_seconds):
+    def start(self, game_duration_seconds: int, intermission_duration_seconds: int) -> None:
         '''Set the game clock. If a game is currently underway, this will reset the time elapsed and set the amount of time left as specified.'''
         self._assert_not_started()
 
@@ -79,34 +81,34 @@ class GameClock(object):
         self._timed = False
         self._time_elapsed = 0.0
     
-    def add_paused_callback(self, f, *args, **kwargs):
+    def add_paused_callback(self, f: Callable, *args, **kwargs) -> None:
         '''Add a callback function which will be called with the specified arguments each time the game is paused.'''
         self._paused_callbacks.append(Callback(f, args, kwargs))
 
-    def add_resumed_callback(self, f, *args, **kwargs):
+    def add_resumed_callback(self, f: Callable, *args, **kwargs) -> None:
         '''Add a callback function which will be called with the specified arguments each time the game is resumed.'''
         self._resumed_callbacks.append(Callback(f, args, kwargs))
     
-    def add_resume_countdown_tick_callback(self, f, *args, **kwargs):
+    def add_resume_countdown_tick_callback(self, f: Callable, *args, **kwargs) -> None:
         '''Add a callback function which will be called with the specified arguments following the number of seconds until the game resumes each second until it does.'''
         self._resume_countdown_tick_callbacks.append(Callback(f, args, kwargs))
     
-    def add_timeleft_altered_callback(self, f, *args, **kwargs):
+    def add_timeleft_altered_callback(self, f: Callable, *args, **kwargs) -> None:
         '''Add a callback which will be called with the specified arguments following the time left each time the amount of time in the game is altered.'''
         self._timeleft_altered_callbacks.append(Callback(f, args, kwargs))
     
-    def add_intermission_started_callback(self, f, *args, **kwargs):
+    def add_intermission_started_callback(self, f: Callable, *args, **kwargs) -> None:
         '''Add a callback which will be called with the specified arguments each time the game clock enters intermission.'''
         self._intermission_started_callbacks.append(Callback(f, args, kwargs))
     
-    def add_intermission_ended_callback(self, f, *args, **kwargs):
+    def add_intermission_ended_callback(self, f: Callable, *args, **kwargs) -> None:
         '''Add a callback which will be called with the specified arguments each the time game clock leaves intermission.'''
         self._intermission_ended_callbacks.append(Callback(f, args, kwargs))
 
     def set_resuming_state(self):
         self._state = states.RESUMING
     
-    def resume(self, delay=None):
+    def resume(self, delay: None = None) -> None:
         '''Resume the clock. If a delay is specified, the timer will resume after that number of seconds.'''
         if self.is_resuming:
             if self._resume_countdown is not None:
@@ -147,16 +149,16 @@ class GameClock(object):
         return scheduled_callback_wrapper
     
     @property
-    def is_started(self):
+    def is_started(self) -> bool:
         return self._state not in (states.NOT_STARTED, states.ENDED)
     
     @property
-    def is_paused(self):
+    def is_paused(self) -> bool:
         '''Is the game clock currently paused.'''
         return self._state in (states.NOT_STARTED, states.PAUSED, states.RESUMING)
     
     @property
-    def is_resuming(self):
+    def is_resuming(self) -> bool:
         '''Is there a resume countdown currently in progress.'''
         return self._state == states.RESUMING
 
@@ -166,7 +168,7 @@ class GameClock(object):
         return self._state in (states.RUNNING, states.PAUSED, states.RESUMING)
 
     @property
-    def is_intermission(self):
+    def is_intermission(self) -> bool:
         '''Is the game clock currently in intermission.'''
         return self._state == states.INTERMISSION
 
@@ -200,12 +202,12 @@ class GameClock(object):
             return 0.0
 
     @property
-    def time_elapsed(self):
+    def time_elapsed(self) -> float:
         '''Return how many seconds this game has been going for.'''
         if self.is_paused:
             return self._time_elapsed
         else:
-            time_elapsed = self._time_elapsed or 0.0
+            time_elapsed = self._time_elapsed
             last_resume_time = self._last_resume_time or self.clock.seconds()
             return time_elapsed + (self.clock.seconds() - last_resume_time)
 
@@ -219,14 +221,18 @@ class GameClock(object):
         pause_all(self._scheduled_callback_wrappers)
         call_all(self._paused_callbacks)
 
-    def _resumed(self):
+    def _resumed(self) -> None:
         self._state = states.RUNNING
         self._last_resume_time = self.clock.seconds()
         self._resume_countdown = None
         if self._timed:
-            self._intermission_start_scheduled_callback_wrapper.resume()
-            self._intermission_end_scheduled_callback_wrapper.resume()
-        resume_all(self._scheduled_callback_wrappers)
+            if self._intermission_end_scheduled_callback_wrapper:
+                self._intermission_end_scheduled_callback_wrapper.resume()
+            if self._intermission_start_scheduled_callback_wrapper:
+                self._intermission_start_scheduled_callback_wrapper.resume()
+
+            resume_all(self._scheduled_callback_wrappers)
+
         call_all(self._resumed_callbacks)
         
     def _resume_countdown_tick(self, seconds):

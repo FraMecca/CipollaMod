@@ -2,32 +2,37 @@ import uuid
 
 from cipolla.game.player.player_state import PlayerState
 from cipolla.game.server_message_formatter import smf
-from cipolla.protocol import swh
+from cipolla.protocol import swh # type: ignore
 
+from typing import Dict, Any
+
+from cube2protocol.cube_data_stream import CubeDataStream
+from typing import Callable
+from cipolla.game.client.client import Client
 
 class Player(object):
 
-    instances_by_uuid = {}
+    instances_by_uuid: Dict[str, Any] = {} # TODO: put player
 
-    def __init__(self, client, playernum, name, playermodel):
+    def __init__(self, client: Client, playernum: int, name: str, playermodel: int) -> None:
         self.client = client
-        self._pn = playernum
-        self.name = ''.join(name)
-        self.playermodel = playermodel
-        self._team = ""
-        self._isai = False
-        self._uuid = str(uuid.uuid4())
+        self._pn: int = playernum
+        self.name: str = ''.join(name)
+        self.playermodel: int = playermodel
+        self._team: str = ""
+        self._isai: bool = False
+        self._uuid: str = str(uuid.uuid4())
 
         Player.instances_by_uuid[self.uuid] = self
 
-        self._state = PlayerState()
+        self._state: PlayerState = PlayerState()
 
     @property
-    def cn(self):
+    def cn(self) -> int:
         return self._pn
 
     @property
-    def pn(self):
+    def pn(self) -> int:
         return self._pn
 
     @property
@@ -35,20 +40,20 @@ class Player(object):
         return self.client.ping
 
     @property
-    def privilege(self):
+    def privilege(self) -> int:
         if self.isai: return 0
         else: return self.client.privilege
 
     @property
-    def state(self):
+    def state(self) -> PlayerState:
         return self._state
 
     @property
-    def isai(self):
+    def isai(self) -> bool:
         return self._isai
 
     @property
-    def uuid(self):
+    def uuid(self) -> str:
         return self._uuid
 
     @property
@@ -56,15 +61,7 @@ class Player(object):
         return self.client.room
 
     @property
-    def teamname(self):
-        return self._team
-
-    @teamname.setter
-    def teamname(self, team):
-        self._team = team or ""
-
-    @property
-    def shares_name(self):
+    def shares_name(self) -> bool:
         return self.room.is_name_duplicate(self.name)
 
     def __format__(self, format_spec):
@@ -78,7 +75,7 @@ class Player(object):
     def on_respawn(self, lifesequence, gunselect):
         self.state.on_respawn(lifesequence, gunselect)
 
-    def write_state(self, room_positions, room_messages):
+    def write_state(self, room_positions: CubeDataStream, room_messages: CubeDataStream) -> None:
         if self.state.position is not None:
             room_positions.write(self.state.position)
 
@@ -95,5 +92,5 @@ class Player(object):
         self.client.send_server_message(message)
 
     @property
-    def sendbuffer(self):
+    def sendbuffer(self) -> Callable:
         return self.client.sendbuffer

@@ -14,9 +14,9 @@ class Field(object):
             value = type_method_mapping[self.type](stream_object, peek)
             logger.debug("\t\tRead value: {}".format(self.name))
             return (self.name, value)
-        except:
+        except Exception as e:
             print(("Exception occurred while reading field '%s'" % self.name))
-            raise
+            raise e
             
 class GameStateField(Field): pass
     

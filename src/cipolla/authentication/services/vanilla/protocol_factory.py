@@ -1,17 +1,22 @@
 import logging
+import itertools
 
-from twisted.internet.protocol import ReconnectingClientFactory
+from twisted.internet import defer, reactor # type: ignore
+from twisted.internet.protocol import ReconnectingClientFactory # type: ignore
+from twisted.internet.address import IPv4Address # type: ignore
+from twisted.internet.tcp import Connector # type: ignore
+from twisted.python.failure import Failure # type: ignore
+
+from cube2common.constants import AUTHCHALLEN # type: ignore
 from cipolla.authentication.services.vanilla.protocol import MasterClientProtocol
 from cipolla.authentication.exceptions import AuthFailedException
 from cipolla.authentication.services.vanilla.constants import authentication_states
-from cube2common.constants import AUTHCHALLEN
-from twisted.internet import defer, reactor
 from cipolla.authentication.services.vanilla.authentication_context import AuthenticationContext,\
     AuthChallenge
-import itertools
 from cipolla.authentication.services.vanilla.auth_success import VanillaAuthSuccess
+from cipolla.authentication.services.vanilla.punitive_model_adapter import PunitiveModelAdapter
 
-
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.WARN)
@@ -21,28 +26,28 @@ class MasterClientProtocolFactory(ReconnectingClientFactory):
 
     clock = reactor
 
-    def __init__(self, punitive_model, host, register_port):
+    def __init__(self, punitive_model: PunitiveModelAdapter, host: str, register_port: int) -> None:
         self.host = host
         self.punitive_model = punitive_model
         self.register_port = register_port
 
         self.noisy = False
 
-        self.pending_auths = {}
+        self.pending_auths: Dict[int, AuthenticationContext] = {}
         self._auth_id = itertools.count()
 
-        self.active_connection = None
+        # self.active_connection: Optional[MasterClientProtocol] = None
 
-    def buildProtocol(self, addr):
+    def buildProtocol(self, addr: IPv4Address) -> MasterClientProtocol:
         logger.debug('Master server connected.')
         self.active_connection = MasterClientProtocol()
         self.active_connection.factory = self
         return self.active_connection
     
-    def connectionMade(self, protocol):
+    def connectionMade(self, protocol: MasterClientProtocol) -> None:
         self.active_connection.send_regserv(self.register_port)
 
-    def clientConnectionLost(self, connector, reason):
+    def clientConnectionLost(self, connector: Connector, reason: Failure) -> None:
         logger.debug('Lost connection.  Reason: {!r}'.format(reason))
         ReconnectingClientFactory.clientConnectionLost(self, connector, reason)
 

@@ -12,9 +12,11 @@ from cipolla.game.gamemode.tactics import Tactics
 from cipolla.game.gamemode.tactics_ctf import TacticsCtf
 from cipolla.game.gamemode.tactics_team import TacticsTeam
 
+from typing import Dict
+
 
 mode_nums = {}
-gamemodes = {}
+gamemodes: Dict[str, type] = {}
 
 gamemode_objects = [Coop, Teamplay, FreeForAll, Ctf,
                     Effic, EfficCtf, EfficTeam,
@@ -28,5 +30,5 @@ for gamemode_object in gamemode_objects:
 for gamemode_object in gamemode_objects:
     gamemodes[gamemode_object.clientmodename] = gamemode_object
 
-def get_mode_name_from_num(mode_num):
+def get_mode_name_from_num(mode_num: int) -> str:
     return mode_nums.get(mode_num, None)

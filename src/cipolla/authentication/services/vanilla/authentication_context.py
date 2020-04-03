@@ -1,5 +1,5 @@
-from twisted.internet import defer
-from zope.interface import implementer
+from twisted.internet import defer # type: ignore
+from zope.interface import implementer # type: ignore
 
 from cipolla.authentication.interfaces import IAuthChallenge
 from cipolla.authentication.services.vanilla.constants import authentication_states

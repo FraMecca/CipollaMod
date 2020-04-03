@@ -3,18 +3,14 @@ import logging
 import time
 import traceback
 
-from twisted.internet import reactor
-from twisted.python.failure import Failure
+from twisted.internet import reactor # type: ignore
+from twisted.python.failure import Failure # type: ignore
 
-from cube2common.constants import disconnect_types, MAXNAMELEN
-from cube2protocol.cube_data_stream import CubeDataStream
-from cipolla.game.client.client_auth_state import ClientAuthState
-from cipolla.game.client.client_player_collection import ClientPlayerCollection
+from cube2common.constants import disconnect_types, MAXNAMELEN # type: ignore
+from cube2protocol.cube_data_stream import CubeDataStream # type: ignore
 from cipolla.game.client.exceptions import *
 from cipolla.game.room.exceptions import *
-from cipolla.game.player.player import Player
 from cipolla.game.room.exceptions import RoomEntryFailure
-from cipolla.game.room.roles import BaseRole, MasterRole, AdminRole
 from cipolla.game.server_message_formatter import error, smf, denied, state_error, usage_error
 from cipolla.protocol import swh
 from cipolla.utils.constrain import ConstraintViolation
@@ -22,7 +18,7 @@ from cipolla.utils.filtertext import filtertext
 from cipolla.utils.ping_buffer import PingBuffer
 from cipolla.utils.tracing import tracer
 
-
+from typing import Dict, Iterator, List, Union
 logger = logging.getLogger(__name__)
 
 class Client(object):
@@ -30,9 +26,14 @@ class Client(object):
     Handles the per client networking, and distributes the messages out to the players (main, bots).
     '''
     def __init__(self, protocol, clientnum_handle, room, auth_world_view, servinfo_domain, punitive_model):
+        from cipolla.game.room.room import Room
+        from cipolla.game.room.roles import BaseRole, MasterRole, AdminRole
+        from cipolla.game.client.client_player_collection import ClientPlayerCollection
+        from cipolla.game.client.client_auth_state import ClientAuthState
+
         self.cn_handle = clientnum_handle
         self.cn = clientnum_handle.cn
-        self.room = room
+        self.room: Room = room
         self.role = BaseRole()
         self.connection_sequence_complete = False
 
@@ -70,14 +71,14 @@ class Client(object):
 
         return smf.format(fmt, player=player)
 
-    def connected(self):
+    def connected(self) -> None:
         print("connect:", self.host)
         with self.sendbuffer(1, True) as cds:
             swh.put_servinfo(cds, self, haspwd=False, description="", domain=self._servinfo_domain)
 
         self.connect_timeout_deferred = reactor.callLater(1, self.connect_timeout)
 
-    def disconnected(self):
+    def disconnected(self) -> None:
         print("disconnect:", self.host)
         if self.is_connected:
             self.room.client_leave(self)
@@ -89,19 +90,27 @@ class Client(object):
         '''Disconnect client because it didn't send N_CONNECT soon enough.'''
         self.disconnect(disconnect_types.DISC_NONE, message=error("Hey What's up, you didn't send an N_CONNECT message!"))
 
-    def connect_received(self, message):
+    def connect_received(self, message: Dict[str, Union[str, int]]) -> None:
         '''Create the main player instance for this client and join room.'''
+        from cipolla.game.player.player import Player
         if not self.connect_timeout_deferred.called:
             self.connect_timeout_deferred.cancel()
+
+        assert isinstance(message['name'], str)
+        assert isinstance(message['playermodel'], int), message
+        assert isinstance(message['authname'], str)
+        # TODO refactor and include checking of incoming msgs
 
         name = filtertext(message['name'], False, MAXNAMELEN)
         playermodel = message['playermodel']
         player = Player(self, self.cn, name, playermodel)
         self.add_player(player)
 
-        pwdhash = message['pwdhash']
+        assert isinstance(message['pwdhash'], str)
+        assert isinstance(message['authname'], str)
+        pwdhash: str = message['pwdhash']
         authdomain = message['authdomain']
-        authname = message['authname']
+        authname: str = message['authname']
 
         if len(authname) > 0:
             deferred = self.auth(authdomain, authname)
@@ -109,23 +118,23 @@ class Client(object):
         else:
             self.connection_auth_finished(None, pwdhash)
 
-    def connection_auth_finished(self, authentication, pwdhash):
+    def connection_auth_finished(self, authentication: None, pwdhash: str) -> None:
         player = self.get_player()
 
         ban_info = self._punitive_model.get_effect('ban', self.host)
-        if ban_info is not None and not self.allowed(bypass_ban) and not ban_info.expired:
+        if ban_info is not None and not ban_info.expired:
             return self.disconnect(disconnect_types.DISC_IPBAN, error("You are banned."))
 
         try:
             room_entry_context = self.room.get_entry_context(self, player)
         except RoomEntryFailure as e:
-            return self.disconnect(e.disconnect_type, e.message)
+            return self.disconnect(e.disconnect_type, str(e))
 
         self.room.client_enter(room_entry_context)
 
         self.connection_sequence_complete = True
 
-    def send_server_message(self, message):
+    def send_server_message(self, message: str) -> None:
         if message:
             with self.sendbuffer(1, True) as cds:
                 swh.put_servmsg(cds, message)
@@ -134,7 +143,7 @@ class Client(object):
         self.role = new_role
 
     @property
-    def is_connected(self):
+    def is_connected(self) -> bool:
         return self.has_pn() and self.connection_sequence_complete
 
     @property
@@ -149,19 +158,19 @@ class Client(object):
     def time_online(self):
         return int(time.time()) - self.connect_time
 
-    def has_pn(self, pn=-1):
+    def has_pn(self, pn: int = -1) -> bool:
         return self._client_player_collection.has_pn(pn=pn)
 
-    def get_player(self, pn=-1):
+    def get_player(self, pn: int = -1):
         return self._client_player_collection.get_player(pn=pn)
 
-    def add_player(self, player):
+    def add_player(self, player) -> None:
         self._client_player_collection.add_player(player)
 
     def player_iter(self):
         return self._client_player_collection.player_iter()
 
-    def send(self, channel, data, reliable, no_allocate=False):
+    def send(self, channel: int, data: CubeDataStream, reliable: bool, no_allocate: bool = False) -> None:
         if type(data) == memoryview:
             data = data.tobytes()
         elif type(data) == CubeDataStream:
@@ -171,7 +180,7 @@ class Client(object):
         self.protocol_wrapper.send(channel, data, reliable, no_allocate)
 
     @contextlib.contextmanager
-    def sendbuffer(self, channel, reliable):
+    def sendbuffer(self, channel: int, reliable: bool) -> Iterator[CubeDataStream]:
         cds = CubeDataStream()
         yield cds
         self.send(channel, cds, reliable)
@@ -203,7 +212,7 @@ class Client(object):
             print("Disconnecting client {} due to constraint violation {}.".format(self.host, e.constraint_name))
             self.disconnect(disconnect_types.DISC_MSGERR)
 
-    def _message_received(self, message_type, message):
+    def _message_received(self, message_type: str, message: Dict[str, Union[str, int, List[int], bytes, List]]) -> None:
         if self._ignore_client_messages: return
         try:
             if (not self.is_connected) and (message_type in self._ignored_preconnect_message_types):
@@ -227,5 +236,5 @@ class Client(object):
             self._ignore_client_messages = True
 
     @property
-    def privilege(self):
+    def privilege(self) -> int:
         return self.role.privilege

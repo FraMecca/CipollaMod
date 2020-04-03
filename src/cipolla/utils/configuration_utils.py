@@ -2,16 +2,20 @@ from itertools import repeat
 
 from cipolla.config_manager import ConfigurationError, ConfigurationFileError
 
-def asint(key, value):
+from typing import Dict, Tuple
+
+from typing import Union, Dict, Any
+
+def asint(key: str, value: str) -> int:
     if value.isdigit() and int(value) >= 0:
         return int(value)
     else:
         raise ConfigurationError(f'{key} should be a positive integer')
 
-def asstr(key, value):
+def asstr(key: str, value: str) -> str:
     return value
 
-def asjsonobj(key, value):
+def asjsonobj(key: str, value: str) -> Any:
     from json import loads as jloads
     from os.path import exists
     if exists(value):
@@ -23,7 +27,7 @@ def asjsonobj(key, value):
     else:
         raise ConfigurationError(f"{value} can't be found on disk. Check path.")
 
-def asbool(key, value):
+def asbool(key: str, value: str) -> int:
     from distutils import util
     try:
         return util.strtobool(value)
@@ -34,7 +38,7 @@ def asbool(key, value):
 def missing_keys(keys, obj):
     return set(keys) - set(obj)
 
-def validate_message_file(filename):
+def validate_message_file(filename: str) -> Dict[str, str]:
     from configparser import ConfigParser
     cfg = ConfigParser()
     try:
@@ -45,7 +49,7 @@ def validate_message_file(filename):
     except:
         raise ConfigurationError(f'Invalid message file: {filename}.')
 
-def get_available_maps(package_dir):
+def get_available_maps(package_dir: str) -> Tuple:
     def get(package_dir):
         import glob
         package_dir += 'base/' if package_dir == '/' else '/base/'

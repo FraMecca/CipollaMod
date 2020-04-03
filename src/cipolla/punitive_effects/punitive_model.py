@@ -1,21 +1,23 @@
 from cipolla.utils.net import dottedQuadToLong, simpleMaskedIpToLongIpAndMask
 
+from typing import Optional, Dict, Any
+
 
 class PunitiveModel(object):
     # effect_type: {mask: {masked_ip: effect_info}}
-    punitive_effects = {}
+    punitive_effects: Dict[str, Any] = {} # TODO: figure out effect_info or rework this class
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.clear_effects()
 
-    def clear_effects(self, effect_type=None):
+    def clear_effects(self, effect_type: Optional[str] = None) -> None:
         if effect_type is None:
             self.punitive_effects = {}
         else:
             self.punitive_effects[effect_type] = {}
 
-    def get_effect(self, effect_type, client_ip):
-        client_ip = dottedQuadToLong(client_ip)
+    def get_effect(self, effect_type: str, _client_ip: str) -> None:
+        client_ip = dottedQuadToLong(_client_ip)
         effects_of_type = self.punitive_effects.get(effect_type, {})
         for mask, effects in effects_of_type.items():
             masked_ip = mask & client_ip

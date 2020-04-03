@@ -1,7 +1,8 @@
 import os.path
 import glob
 
-def import_all(init_module_name, module_prefix, exclude):
+from typing import List
+def import_all(init_module_name: str, module_prefix: str, exclude: List[str]) -> None:
 
     file_path = os.path.abspath(init_module_name)
     dir_dir = os.path.dirname(file_path)

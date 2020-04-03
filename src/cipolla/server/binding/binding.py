@@ -1,8 +1,11 @@
-from txENet.enet_server_endpoint import ENetServerEndpoint
+from txENet.enet_server_endpoint import ENetServerEndpoint # type: ignore
 
+from twisted.internet.epollreactor import EPollReactor # type: ignore
+
+from typing import Optional
 
 class Binding(ENetServerEndpoint):
-    def __init__(self, reactor, interface, port, maxclients, channels, maxdown=0, maxup=0, max_duplicate_peers=None):
+    def __init__(self, reactor: EPollReactor, interface: str, port: int, maxclients: int, channels: int, maxdown: int = 0, maxup: int = 0, max_duplicate_peers: Optional[int] = None) -> None:
 
         ENetServerEndpoint.__init__(self, reactor, interface, port, maxclients, channels, maxdown=maxdown, maxup=maxup, max_duplicate_peers=max_duplicate_peers)
 

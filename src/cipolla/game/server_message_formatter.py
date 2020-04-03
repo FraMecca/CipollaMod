@@ -65,7 +65,7 @@ def format_cfg_message(msg, room, player):
         'server_name': room.server_name,
         'room_name': room.name,
         'player_name': player.name,
-        'team': player.teamname,
+        'team': player._team,
     }
     vars.update(colors)
     return msg % vars

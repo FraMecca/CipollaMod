@@ -1,4 +1,4 @@
-def filtertext(src, whitespace, maxlen):
+def filtertext(src: str, whitespace: bool, maxlen: int) -> str:
     last_was_ctrl_char = [False]
 
     def allowchar(c):

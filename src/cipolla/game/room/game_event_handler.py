@@ -5,10 +5,8 @@ from cipolla.utils.constrain import constrain_range
 from cipolla.protocol import swh
 from cipolla.game.room.exceptions import UnknownEvent
 
-from cipolla.utils.tracing import tracer
-
 class GameEventHandler(object):
-    def __init__(self):
+    def __init__(self) -> None:
         self.actions = {
             'take_flag': self.on_take_flag,
             'replenish_ammo': self.on_replenish_ammo,
@@ -42,9 +40,10 @@ class GameEventHandler(object):
             'game_chat': self.on_game_chat,
         }
 
-    def handle_event(self, event_name, *args, **kwargs):
+    def handle_event(self, event_name: str, *args, **kwargs) -> None:
         action = self.actions.get(event_name, self.on_unknown_event)
-        return action(*args, **kwargs)
+        action(*args, **kwargs) # type: ignore
+        # TODO: mypy
 
     def on_unknown_event(self, ev_name, *args, **kwargs):
         print("===ERROR UnknownEvent:", *args, **kwargs)
@@ -135,7 +134,7 @@ class GameEventHandler(object):
         room.gamemode.on_player_shoot(player, shot_id, gun, from_pos, to_pos, hits)
 
     def on_switch_team(self, room, player, team_name):
-        room.gamemode.on_player_try_set_team(player, player, player.teamname, team_name)
+        room.gamemode.on_player_try_set_team(player, player, player._team, team_name)
 
     def on_edit_mode(self, room, player, editmode):
         with room.broadcastbuffer(1, True, [player]) as cds:

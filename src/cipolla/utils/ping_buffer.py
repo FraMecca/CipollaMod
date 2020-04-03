@@ -1,9 +1,11 @@
+from typing import List
+
 class PingBuffer(object):
     BUFFERSIZE = 15
-    def __init__(self):
-        self.pings = []
+    def __init__(self) -> None:
+        self.pings: List[int] = []
     
-    def add(self, ping):
+    def add(self, ping: int) -> None:
         self.pings.append(ping)
         if len(self.pings) > self.BUFFERSIZE:
             self.pings.pop(0)

@@ -1,5 +1,5 @@
 class Team(object):
-    def __init__(self, team_id, name):
+    def __init__(self, team_id: int, name: str) -> None:
         self.id = team_id
         self.name = name
         

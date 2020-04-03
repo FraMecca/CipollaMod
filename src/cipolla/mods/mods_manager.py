@@ -7,13 +7,16 @@ from pathlib import Path
 from cipolla.utils.tuple_utils import snd
 from cipolla.utils.singleton import Singleton
 from cipolla.mods.abstract_mod import AbstractMod
+from cipolla.game.room.room import Room
 from cipolla.utils.tracing import tracer
 
-class ModsManager(metaclass=Singleton):
-    def __init__(self):
+from typing import Dict
 
-        self.mods = {}
-        self.module_map = {}
+class ModsManager(metaclass=Singleton):
+    def __init__(self) -> None:
+
+        self.mods: Dict[str, type] = {}
+        self.module_map: Dict[str, type] = {}
 
         self.mods_folder = Path(__file__).parent
         for pyfile in glob(str(self.mods_folder)+'/*.py'):
@@ -44,7 +47,7 @@ class ModsManager(metaclass=Singleton):
         newmodule = self.load_pythonfile(pymodule.__file__)
         self.load_mod(getmembers(newmodule))
 
-    def enable(self, mod_name, room):
+    def enable(self, mod_name: str, room: Room) -> bool:
         modCls = self.mods[mod_name] # is a class, must be instantiated
         mod = modCls()
         if not room.is_mod_active(mod_name) and mod.can_attach(room):

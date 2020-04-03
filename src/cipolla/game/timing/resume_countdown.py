@@ -1,4 +1,4 @@
-from twisted.internet import reactor
+from twisted.internet import reactor # type: ignore
 
 from cube2common.utils.enum import enum
 

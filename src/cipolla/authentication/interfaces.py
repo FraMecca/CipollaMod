@@ -1,4 +1,4 @@
-import zope.interface
+import zope.interface # type: ignore
 
 class IAuthService(zope.interface.Interface):
     def handles_domain(self, auth_domain):
